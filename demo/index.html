@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Self-Intersections Detection</title>
+<link type="text/css" rel="stylesheet" href="https://unpkg.com/maptalks@<2.0.0/dist/maptalks.css">
+<script type="text/javascript" src="https://unpkg.com/maptalks@<2.0.0/dist/maptalks.min.js"></script>
+<script type="text/javascript" src="../dist/maptalks.isects.min.js"></script>
+</head>
+<body>
+<div style="width:960px;height:600px;" id="map"></div>
+<script>
+
+var map = new maptalks.Map("map",{
+  center: [0, 15],
+  zoom:   4,
+  minZoom:1,
+  maxZoom:18,
+  attributionControl : {
+      'content' : '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>'
+  },
+  baseLayer : new maptalks.TileLayer("base",{
+      'urlTemplate' : 'http://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
+      'subdomains'  : ['a','b','c','d','e']
+  }),
+  layers:[
+    new maptalks.VectorLayer('v')
+  ]
+});
+
+var layer = map.getLayer('v');
+
+//find intersections of polygon
+var polygon = new maptalks.Polygon([
+    [-10, 0],
+    [10, 0],
+    [10, 10],
+    [1, 10],
+    [1, -1],
+    [-1, -1],
+    [-1, 10],
+    [-10, 1]
+])
+.addTo(layer);
+
+var sects = polygon.isects();
+//sects[0] is the ring index of the polygon
+//sects[1] is the intersections of the ring
+sects[0][1].forEach(function (c) {
+  new maptalks.Marker(c, {
+    'symbol' : {
+      'markerType' : 'ellipse',
+      'markerFill' : '#f00',
+      'markerWidth' : 10,
+      'markerHeight' : 10
+    }
+  }).addTo(layer);
+});
+
+
+//find intersections of MultiPolygon
+var multiPolygon = new maptalks.MultiPolygon([
+      [
+          [0, 20],
+          [20, 20],
+          [20, 30],
+          [11, 30],
+          [11, 11],
+          [9, 11],
+          [9, 30],
+          [0, 21]
+      ],
+      [
+          [-20, 20],
+          [0, 20],
+          [0, 30],
+          [-9, 30],
+          [-9, 11],
+          [-11, 11],
+          [-11, 30],
+          [-20, 21]
+      ]
+  ], {
+    symbol : {
+      'polygonFill' : '#00f'
+    }
+  }).addTo(layer);
+
+var mSects = multiPolygon.isects();
+mSects.forEach(function (ms) {
+  //ms[0] is the index of the child polygon
+  //ms[1] is child polygon's intersections
+  //ms[1][0][0] is child polygon's ring index
+  //ms[1][0][1] is child polygon's ring's intersections
+  ms[1][0][1].forEach(function (c) {
+    new maptalks.Marker(c, {
+      'symbol' : {
+        'markerType' : 'ellipse',
+        'markerFill' : '#f00',
+        'markerWidth' : 10,
+        'markerHeight' : 10
+      }
+    }).addTo(layer);
+  });
+});
+
+</script>
+</body>
+</html>
