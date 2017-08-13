@@ -184,3 +184,4 @@ $ gulp minify
 ```shell
 $ npm run lint
 ```
+### 三个方法 startEdit、endEdit、findSnapPoint，两种模式，垂线，端点,接管鼠标事件
