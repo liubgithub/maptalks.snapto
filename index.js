@@ -1,7 +1,11 @@
 import * as maptalks from 'maptalks';
 import rbush from 'rbush';
 
-maptalks.Map.include({
+const options = {
+    'mode': 'point'
+};
+
+/*maptalks.Map.include({
     startSnapTo(options) {
       const geometries = options['geometries'];
       if(Array.isArray(geometries)) {
@@ -18,6 +22,36 @@ maptalks.Map.include({
     },
 
     endSnapTo() {
-
+      
     }
-});
+});*/
+
+class SnapTool extends maptalks.MapTool {
+  constructor(options) {
+     super(options);
+     //this._checkMode(); 
+  }
+
+  getMode() {
+
+  }
+
+  setMode(mode) {
+
+  }
+
+  onEnable() {
+    const map = this.getMap();
+  }
+
+  setLayer(layer) {
+     if(layer instanceof maptalks.VectorLayer) {
+       this._snapGeometries = layer.getGeometries();
+     }
+  }
+  
+  _getAllGeometries() {
+
+  }
+}
+
