@@ -1,5 +1,5 @@
 import * as maptalks from 'maptalks';
-import snapLine from '@turf/point-on-line';
+import rbush from 'rbush';
 
 const options = {
     'mode': 'point'
@@ -38,15 +38,58 @@ class SnapTool extends maptalks.MapTool {
     setMode(mode) {
 
     }
+    
+    addTo(map) {
+        this._mousemoveLayer = new maptalks.VectorLayer('SnapTool_mousemovelayer').addTo(map);
+        this._registerEvents();
+        return super.addTo(map);
+    }
 
-    onEnable() {
+    enable() {
         const map = this.getMap();
+        if (this._snapGeometries) {
+            map.on('mousemove',this._mousemove,this);
+        }
+    }
+
+    disable() {
+         const map = this.getMap();
+         map.off('mousemove',this._mousemove);
     }
 
     setLayer(layer) {
         if (layer instanceof maptalks.VectorLayer) {
             this._snapGeometries = layer.getGeometries();
         }
+    }
+
+    _registerEvents(map) {
+        this._mousemove = function(e){
+            if(!this._marker){
+              this._marker = new maptalks.Marker(e.coordinate, {
+                'symbol' : {
+                'markerType': 'ellipse',
+                'markerFill': 'rgb(10,20,200)',
+                'markerFillOpacity': 1,
+                'markerLineColor': '#fff',
+                'markerLineWidth': 1,
+                'markerLineOpacity': 1,
+                'markerWidth': 20,
+                'markerHeight': 20,
+                'markerDx': 0,
+                'markerDy': 0
+               }
+              }).addTo(this._mousemoveLayer);
+            }
+            else {
+               this._marker.setCoordinates(e.coordinate);
+            }
+
+        }
+    }
+
+    _snap() {
+        const mousePoint = this._marker.toGeoJSON();
     }
 
     _getAllGeometries() {
