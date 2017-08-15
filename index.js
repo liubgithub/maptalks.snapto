@@ -118,10 +118,11 @@ class SnapTool extends maptalks.MapTool {
     _toGeoJSON(geometries) {
         const _snapGeometries = [];
         if(geometries instanceof Array) {
-           geometries.forEach(function() {
-
+           geometries.forEach(function(geo) {
+              _snapGeometries.push(geo.toGeoJSON());
            });
         }
+        return _snapGeometries;
     }
 }
 
