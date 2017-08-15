@@ -1,5 +1,5 @@
 import * as maptalks from 'maptalks';
-import rbush from 'rbush';
+import snapLine from '@turf/point-on-line';
 
 const options = {
     'mode': 'point'
@@ -22,36 +22,35 @@ const options = {
     },
 
     endSnapTo() {
-      
+
     }
 });*/
-
 class SnapTool extends maptalks.MapTool {
-  constructor(options) {
-     super(options);
-     //this._checkMode(); 
-  }
+    constructor(options) {
+        super(options);
+        //this._checkMode();
+    }
 
-  getMode() {
+    getMode() {
 
-  }
+    }
 
-  setMode(mode) {
+    setMode(mode) {
 
-  }
+    }
 
-  onEnable() {
-    const map = this.getMap();
-  }
+    onEnable() {
+        const map = this.getMap();
+    }
 
-  setLayer(layer) {
-     if(layer instanceof maptalks.VectorLayer) {
-       this._snapGeometries = layer.getGeometries();
-     }
-  }
-  
-  _getAllGeometries() {
+    setLayer(layer) {
+        if (layer instanceof maptalks.VectorLayer) {
+            this._snapGeometries = layer.getGeometries();
+        }
+    }
 
-  }
+    _getAllGeometries() {
+
+    }
 }
 
