@@ -1,10 +1,13 @@
 import * as maptalks from 'maptalks';
-import rbush from 'rbush';
+import geojsonRbush from 'geojson-rbush';
+import turfSnap from '@turf/point-on-line';
 
 const options = {
-    'mode': 'point'
+    'mode': 'point',
+    'tolerance':10
 };
 
+const allGemetries = null;
 /*maptalks.Map.include({
     startSnapTo(options) {
       const geometries = options['geometries'];
@@ -59,7 +62,7 @@ class SnapTool extends maptalks.MapTool {
 
     setLayer(layer) {
         if (layer instanceof maptalks.VectorLayer) {
-            this._snapGeometries = layer.getGeometries();
+            this._snapLayer = layer;
         }
     }
 
@@ -84,8 +87,11 @@ class SnapTool extends maptalks.MapTool {
             else {
                this._marker.setCoordinates(e.coordinate);
             }
-
         }
+    }
+
+    _findGeometry(coordinate) {
+        const tolerance = !this.options['tolerance'];
     }
 
     _snap() {
@@ -93,7 +99,29 @@ class SnapTool extends maptalks.MapTool {
     }
 
     _getAllGeometries() {
+        const _allGeometries = [];
+        if(this._snapLayer) {
+           _allGeometries = this._snapLayer.getGeometries();
+        }
+        else {
+           const map = this.getMap();
+           const layers = map.getLayers(function(layer){
+             return (layer instanceof maptalks.VectorLayer);
+           });
+           layers.forEach(function(layer){
+              _allGeometries=_allGeometries.concat(layer.getGeometries());
+           });
+        }
+        return _allGeometries;
+    }
 
+    _toGeoJSON(geometries) {
+        const _snapGeometries = [];
+        if(geometries instanceof Array) {
+           geometries.forEach(function() {
+
+           });
+        }
     }
 }
 
