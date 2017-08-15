@@ -44,6 +44,7 @@
     "maptalks": "^0.16.0"
   },
   "dependencies": {
-    "rbush": "^2.0.1"
+    "@turf/point-on-line": "^4.6.0",
+    "geojson-rbush": "^1.1.1"
   }
 }
