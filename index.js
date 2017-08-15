@@ -114,7 +114,7 @@ class SnapTool extends maptalks.MapTool {
         }
         return _allGeometries;
     }
-
+    ///
     _toGeoJSON(geometries) {
         const _snapGeometries = [];
         if(geometries instanceof Array) {
