@@ -44,6 +44,6 @@
     "maptalks": "^0.16.0"
   },
   "dependencies": {
-    "@turf/point-on-line": "^4.6.0"
+    "rbush": "^2.0.1"
   }
 }
