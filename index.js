@@ -1,38 +1,37 @@
 import * as maptalks from 'maptalks';
-import GeojsonRbush from 'geojson-rbush';
-import TurfSnap from '@turf/point-on-line';
+import rbush from 'geojson-rbush';
+//import TurfSnap from '@turf/point-on-line';
 
 const options = {
     'mode': 'point',
     'tolerance':10
 };
 
-const allGemetries = null;
 
-class SnapTool extends maptalks.MapTool {
+export class SnapTool extends maptalks.MapTool {
     constructor(options) {
         super(options);
         //this._checkMode();
     }
 
     getMode() {
-
+        return this.mode;
     }
 
     setMode(mode) {
-
+        this.mode = mode;
     }
 
     addTo(map) {
         this._mousemoveLayer = new maptalks.VectorLayer('SnapTool_mousemovelayer').addTo(map);
-        this._registerEvents();
         return super.addTo(map);
     }
 
     enable() {
         const map = this.getMap();
-        if (this._snapGeometries) {
-            map.on('mousemove', this._mousemove, this);
+        this.allGeometries = this._getAllGeometries();
+        if (this.allGeometries) {
+            this._registerEvents(map);
         }
     }
 
@@ -47,6 +46,39 @@ class SnapTool extends maptalks.MapTool {
         }
     }
 
+    _prepareGeometries(coordinate) {
+        if (this.allGeometries) {
+            const allGeoInGeojson = this._toGeoJSON(this.allGeometries);
+            let tree = rbush();
+            tree.load({
+                'type': 'FeatureCollection',
+                'features':allGeoInGeojson
+            });
+            const inspectExtent = this._createInspectExtent(coordinate);
+            const availGeometries = tree.search(inspectExtent);
+            return availGeometries;
+        }
+        return null;
+    }
+
+    _createInspectExtent(coordinate) {
+        const tolerance = (!this.options['tolerance']) ? 10 : this.options['tolerance'];
+        const map = this.getMap();
+        const zoom = map.getZoom();
+        const screenPoint = map.coordinateToPoint(coordinate, zoom);
+        const lefttop = map.pointToCoordinate(new maptalks.Point([screenPoint.x - tolerance, screenPoint.y - tolerance]), zoom);
+        const righttop = map.pointToCoordinate(new maptalks.Point([screenPoint.x + tolerance, screenPoint.y - tolerance]), zoom);
+        const leftbottom = map.pointToCoordinate(new maptalks.Point([screenPoint.x - tolerance, screenPoint.y + tolerance]), zoom);
+        const rightbottom = map.pointToCoordinate(new maptalks.Point([screenPoint.x + tolerance, screenPoint.y + tolerance]), zoom);
+        return {
+            'type': 'Feature',
+            'properties': {},
+            'geometry': {
+                'type': 'Polygon',
+                'coordinates': [[[lefttop.x, lefttop.y], [righttop.x, righttop.y], [rightbottom.x, rightbottom.y], [leftbottom.x, leftbottom.y]]]
+            }
+        };
+    }
     _registerEvents(map) {
         this._mousemove = function (e) {
             if (!this._marker) {
@@ -67,15 +99,24 @@ class SnapTool extends maptalks.MapTool {
             } else {
                 this._marker.setCoordinates(e.coordinate);
             }
+            var geos = this._findGeometry(e.coordinate);
+            if (geos.features.length > 0) {
+                console.log(geos.feathres.length);
+            }
+            return geos;
         };
+        map.on('mousemove', this._mousemove, this);
     }
 
     _findGeometry(coordinate) {
-        const tolerance = !this.options['tolerance'];
+        const tolerance = (!this.options['tolerance']) ? 10 : this.options['tolerance'];
+        const availGeimetries = this._prepareGeometries(coordinate, tolerance);
+        return availGeimetries;
     }
 
     _snap() {
         const mousePoint = this._marker.toGeoJSON();
+        return mousePoint;
     }
 
     _getAllGeometries() {
@@ -104,4 +145,6 @@ class SnapTool extends maptalks.MapTool {
         return _snapGeometries;
     }
 }
+
+SnapTool.mergeOptions(options);
 
