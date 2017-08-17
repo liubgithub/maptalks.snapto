@@ -1,6 +1,5 @@
 import * as maptalks from 'maptalks';
 import rbush from 'geojson-rbush';
-//import TurfSnap from '@turf/point-on-line';
 
 const options = {
     'mode': 'point',
@@ -101,7 +100,7 @@ export class SnapTool extends maptalks.MapTool {
             }
             var geos = this._findGeometry(e.coordinate);
             if (geos.features.length > 0) {
-                console.log(geos.feathres.length);
+                console.log(geos.features.length);
             }
             return geos;
         };
@@ -139,11 +138,44 @@ export class SnapTool extends maptalks.MapTool {
         const _snapGeometries = [];
         if (geometries instanceof Array) {
             geometries.forEach(function (geo) {
-                _snapGeometries.push(geo.toGeoJSON());
+                const geojson = geo.toGeoJSON();
+                geojson.obj = geo;
+                _snapGeometries.push(geojson);
             });
         }
         return _snapGeometries;
     }
+    //calaculate the distance from a point to a line
+    _distToPolyline(point, line) {
+        const equation = this._setEquation(line);
+        const A = equation.A;
+        const B = equation.B;
+        const C = equation.C;
+        const distance = Math.abs((A * point.x + B * point.y + C) / Math.sqrt(Math.pow(A, 2) + Math.pow(B, 2)));
+        return distance;
+    }
+    //create a line's equation
+    _setEquation(line) {
+        const coords = line.getCoordinates();
+        const from = coords[0];
+        const to = coords[1];
+        const k = (from.y - to.y) / (from.x - to.x);
+        const A = k;
+        const B = -1;
+        const C = from.y - k * from.x;
+        return {
+            A : A,
+            B : B,
+            C : C
+        };
+    }
+
+    _solveEquation(equationW, equationU) {
+        const A1 = equationW.A,B1 = equationW.B, C1 = equationW.C;
+        const A2 = equationU.A,B1 = equationU.B, C1 = equationU.C;
+        //const x = ()
+    }
+
 }
 
 SnapTool.mergeOptions(options);
