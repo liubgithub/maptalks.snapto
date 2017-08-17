@@ -139,7 +139,7 @@ export class SnapTool extends maptalks.MapTool {
         if (geometries instanceof Array) {
             geometries.forEach(function (geo) {
                 const geojson = geo.toGeoJSON();
-                geojson.obj = geo;
+                geojson.properties.obj = geo;
                 _snapGeometries.push(geojson);
             });
         }
@@ -171,9 +171,14 @@ export class SnapTool extends maptalks.MapTool {
     }
 
     _solveEquation(equationW, equationU) {
-        const A1 = equationW.A,B1 = equationW.B, C1 = equationW.C;
-        const A2 = equationU.A,B1 = equationU.B, C1 = equationU.C;
-        //const x = ()
+        const A1 = equationW.A, B1 = equationW.B, C1 = equationW.C;
+        const A2 = equationU.A, B2 = equationU.B, C2 = equationU.C;
+        const x = (B1 * C2 - C1 * B2) / (A1 * B2 - A2 * B1);
+        const y = (A1 * C2 - A2 * C1) / (B1 * A2 - B2 * A1);
+        return {
+            x:x,
+            y:y
+        };
     }
 
 }
