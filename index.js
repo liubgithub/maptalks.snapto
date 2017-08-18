@@ -53,8 +53,8 @@ export class SnapTool extends maptalks.MapTool {
                 'type': 'FeatureCollection',
                 'features':allGeoInGeojson
             });
-            const inspectExtent = this._createInspectExtent(coordinate);
-            const availGeometries = tree.search(inspectExtent);
+            this.inspectExtent = this._createInspectExtent(coordinate);
+            const availGeometries = tree.search(this.inspectExtent);
             return availGeometries;
         }
         return null;
@@ -100,17 +100,55 @@ export class SnapTool extends maptalks.MapTool {
             }
             var geos = this._findGeometry(e.coordinate);
             if (geos.features.length > 0) {
-                console.log(geos.features.length);
+                //console.log(geos.features.length);
+                this._findLines(geos.features);
             }
             return geos;
         };
         map.on('mousemove', this._mousemove, this);
     }
 
+    _findLines(features) {
+        const lines = this._compositLine(features);
+        let tree = rbush();
+        tree.clear();
+        tree.load({
+            'type': 'FeatureCollection',
+            'features':lines
+        });
+        const availLines = tree.search(this.inspectExtent);
+        return availLines;
+    }
+
     _findGeometry(coordinate) {
         const tolerance = (!this.options['tolerance']) ? 10 : this.options['tolerance'];
         const availGeimetries = this._prepareGeometries(coordinate, tolerance);
         return availGeimetries;
+    }
+
+    _compositLine(features) {
+        const geos = [];
+        features.forEach(feature => {
+            const coordinates = feature.geometry.coordinates;
+            for (let i = 0; i < coordinates.length; i++) {
+                const coords = coordinates[i];
+                let len = coords.length - 1;
+                if (feature.geometry.type === 'polygon') {
+                    len = coords.length - 2;
+                } else if (feature.geometry.type === 'linestring') {
+                    len = coords.length - 1;
+                }
+                for (let j = 0; j < len - 1; j++) {
+                    const line = new maptalks.LineString([coords[j], coords[j + 1]], {
+                        properties : {
+                            obj : feature.getProperties().obj
+                        }
+                    });
+                    geos.push(line.toGeoJSON());
+                }
+            }
+        });
+        return geos;
     }
 
     _snap() {
