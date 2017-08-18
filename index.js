@@ -108,6 +108,18 @@ export class SnapTool extends maptalks.MapTool {
         map.on('mousemove', this._mousemove, this);
     }
 
+    _setDistance(lines) {
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const distance = this._distToPolyline(this._marker.getCenter(), line);
+            line.properties.distance = distance;
+            const lineEquation = this._setEquation(line);
+            const VerticalLine = this._setVertiEquation(-lineEquation.A / lineEquation.B, this._marker.getCenter());
+            const insectPoint = this._solveEquation(lineEquation, VerticalLine);
+            line.properties.insectPoint = insectPoint;
+        }
+        return lines;
+    }
     _findLines(features) {
         const lines = this._compositLine(features);
         let tree = rbush();
@@ -194,7 +206,7 @@ export class SnapTool extends maptalks.MapTool {
     }
     //create a line's equation
     _setEquation(line) {
-        const coords = line.getCoordinates();
+        const coords = line.geometry.coordinates;
         const from = coords[0];
         const to = coords[1];
         const k = (from.y - to.y) / (from.x - to.x);
@@ -208,6 +220,17 @@ export class SnapTool extends maptalks.MapTool {
         };
     }
 
+    _setVertiEquation(k, point) {
+        const b = point.y - k * point.x;
+        const A = k;
+        const B = -1;
+        const C = b;
+        return {
+            A : A,
+            B : B,
+            C : C
+        };
+    }
     _solveEquation(equationW, equationU) {
         const A1 = equationW.A, B1 = equationW.B, C1 = equationW.C;
         const A2 = equationU.A, B2 = equationU.B, C2 = equationU.C;
