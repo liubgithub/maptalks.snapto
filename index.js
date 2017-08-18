@@ -100,8 +100,9 @@ export class SnapTool extends maptalks.MapTool {
             }
             var geos = this._findGeometry(e.coordinate);
             if (geos.features.length > 0) {
-                //console.log(geos.features.length);
-                this._findLines(geos.features);
+                console.log(geos.features.length);
+                const availLines = this._findLines(geos.features);
+                const nearestLine = this._findNearestLine(availLines);
             }
             return geos;
         };
@@ -120,6 +121,12 @@ export class SnapTool extends maptalks.MapTool {
         }
         return lines;
     }
+
+    _findNearestLine(lines) {
+        lines = this._compare(lines, 'distance');
+        return lines[0];
+    }
+
     _findLines(features) {
         const lines = this._compositLine(features);
         let tree = rbush();
@@ -242,6 +249,19 @@ export class SnapTool extends maptalks.MapTool {
         };
     }
 
+    _compare(data, propertyName) {
+        return function (object1, object2) {
+            const value1 = object1.properties[propertyName];
+            const value2 = object2.properties[propertyName];
+            if (value2 < value1) {
+                return 1;
+            } else if (value2 > value1) {
+                return -1;
+            } else {
+                return 0;
+            }
+        };
+    }
 }
 
 SnapTool.mergeOptions(options);
