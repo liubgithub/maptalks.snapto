@@ -102,7 +102,13 @@ export class SnapTool extends maptalks.MapTool {
             if (geos.features.length > 0) {
                 console.log(geos.features.length);
                 const availLines = this._findLines(geos.features);
-                const nearestLine = this._findNearestLine(availLines);
+                if (availLines.features.length > 0) {
+                    const _nearestLine = this._findNearestLine(availLines);
+                    const nearestLine = this._setEquation(_nearestLine);
+                    const verticalLine = this._setVertiEquation(nearestLine.A / nearestLine.B, this._marker.getCenter());
+                    const snapPoint = this._solveEquation(nearestLine, verticalLine);
+                    this._marker.setCoordinates([snapPoint.x, snapPoint.y]);
+                }
             }
             return geos;
         };
@@ -130,7 +136,6 @@ export class SnapTool extends maptalks.MapTool {
     _findLines(features) {
         const lines = this._compositLine(features);
         let tree = rbush();
-        tree.clear();
         tree.load({
             'type': 'FeatureCollection',
             'features':lines
@@ -160,7 +165,7 @@ export class SnapTool extends maptalks.MapTool {
                 for (let j = 0; j < len - 1; j++) {
                     const line = new maptalks.LineString([coords[j], coords[j + 1]], {
                         properties : {
-                            obj : feature.getProperties().obj
+                            obj : feature.properties.obj
                         }
                     });
                     geos.push(line.toGeoJSON());
