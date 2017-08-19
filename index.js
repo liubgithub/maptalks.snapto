@@ -103,7 +103,7 @@ export class SnapTool extends maptalks.MapTool {
                 console.log(geos.features.length);
                 const availLines = this._findLines(geos.features);
                 if (availLines.features.length > 0) {
-                    const _nearestLine = this._findNearestLine(availLines);
+                    const _nearestLine = this._findNearestLine(availLines.features);
                     const nearestLine = this._setEquation(_nearestLine);
                     const verticalLine = this._setVertiEquation(nearestLine.A / nearestLine.B, this._marker.getCenter());
                     const snapPoint = this._solveEquation(nearestLine, verticalLine);
@@ -121,7 +121,7 @@ export class SnapTool extends maptalks.MapTool {
             const distance = this._distToPolyline(this._marker.getCenter(), line);
             line.properties.distance = distance;
             const lineEquation = this._setEquation(line);
-            const VerticalLine = this._setVertiEquation(-lineEquation.A / lineEquation.B, this._marker.getCenter());
+            const VerticalLine = this._setVertiEquation(lineEquation.B / lineEquation.A, this._marker.getCenter());
             const insectPoint = this._solveEquation(lineEquation, VerticalLine);
             line.properties.insectPoint = insectPoint;
         }
@@ -129,7 +129,8 @@ export class SnapTool extends maptalks.MapTool {
     }
 
     _findNearestLine(lines) {
-        lines = this._compare(lines, 'distance');
+        lines = this._setDistance(lines);
+        lines = lines.sort(this._compare(lines, 'distance'));
         return lines[0];
     }
 
@@ -162,7 +163,7 @@ export class SnapTool extends maptalks.MapTool {
                 } else if (feature.geometry.type === 'linestring') {
                     len = coords.length - 1;
                 }
-                for (let j = 0; j < len - 1; j++) {
+                for (let j = 0; j < len; j++) {
                     const line = new maptalks.LineString([coords[j], coords[j + 1]], {
                         properties : {
                             obj : feature.properties.obj
@@ -221,10 +222,10 @@ export class SnapTool extends maptalks.MapTool {
         const coords = line.geometry.coordinates;
         const from = coords[0];
         const to = coords[1];
-        const k = (from.y - to.y) / (from.x - to.x);
+        const k = (from[1] - to[1]) / (from[0] - to[0]);
         const A = k;
         const B = -1;
-        const C = from.y - k * from.x;
+        const C = from[1] - k * from[0];
         return {
             A : A,
             B : B,
