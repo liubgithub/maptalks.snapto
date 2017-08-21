@@ -3,13 +3,26 @@ import rbush from 'geojson-rbush';
 
 const options = {
     'mode': 'point',
-    'tolerance':10
+    'tolerance':10,
+    'symbol':{
+        'markerType': 'ellipse',
+        'markerFill': 'rgb(10,20,200)',
+        'markerFillOpacity': 1,
+        'markerLineColor': '#fff',
+        'markerLineWidth': 1,
+        'markerLineOpacity': 1,
+        'markerWidth': 20,
+        'markerHeight': 20,
+        'markerDx': 0,
+        'markerDy': 0
+    }
 };
 
 
-export class SnapTool extends maptalks.MapTool {
+export class SnapTool extends maptalks.Eventable {
     constructor(options) {
         super(options);
+        this.tree = rbush();
         //this._checkMode();
     }
 
@@ -22,13 +35,13 @@ export class SnapTool extends maptalks.MapTool {
     }
 
     addTo(map) {
-        this._mousemoveLayer = new maptalks.VectorLayer('SnapTool_mousemovelayer').addTo(map);
+        const id = `${maptalks.INTERNAL_LAYER_PREFIX}_snapto`;
+        this._mousemoveLayer = new maptalks.VectorLayer(id).addTo(map);
         return super.addTo(map);
     }
 
     enable() {
         const map = this.getMap();
-        this.allGeometries = this._getAllGeometries();
         if (this.allGeometries) {
             this._registerEvents(map);
         }
@@ -39,27 +52,54 @@ export class SnapTool extends maptalks.MapTool {
         map.off('mousemove', this._mousemove);
     }
 
-    setLayer(layer) {
-        if (layer instanceof maptalks.VectorLayer) {
-            this._snapLayer = layer;
-        }
+    setGeometries(geometries) {
+        geometries = (geometries instanceof Array) ? geometries : [geometries];
+        this.allGeometries = geometries;
     }
 
     _prepareGeometries(coordinate) {
         if (this.allGeometries) {
-            const allGeoInGeojson = this._toGeoJSON(this.allGeometries);
-            let tree = rbush();
-            tree.load({
+            const allGeoInGeojson = this._compositLine(this.allGeometries);
+            this.tree.clear();
+            this.tree.load({
                 'type': 'FeatureCollection',
                 'features':allGeoInGeojson
             });
             this.inspectExtent = this._createInspectExtent(coordinate);
-            const availGeometries = tree.search(this.inspectExtent);
+            const availGeometries = this.tree.search(this.inspectExtent);
             return availGeometries;
         }
         return null;
     }
 
+    _compositLine(geometries) {
+        const geos = [];
+        geometries.forEach(function (geo) {
+            const coordinates = geo.getCoordinates();
+            let len = 0;
+            switch (geo.getType()) {
+            case 'Point':
+                break;
+            case 'Polyline':
+                len = coordinates.length - 1;
+                break;
+            case 'Polygon':
+                len = coordinates.length - 2;
+                break;
+            default:
+                break;
+            }
+            for (let i = 0; i < len; i++) {
+                const line = new maptalks.LineString([coordinates[i], coordinates[i + 1]], {
+                    properties : {
+                        obj : geo
+                    }
+                });
+                geos.push(line.toGeoJSON());
+            }
+        });
+        return geos;
+    }
     _createInspectExtent(coordinate) {
         const tolerance = (!this.options['tolerance']) ? 10 : this.options['tolerance'];
         const map = this.getMap();
@@ -82,35 +122,17 @@ export class SnapTool extends maptalks.MapTool {
         this._mousemove = function (e) {
             if (!this._marker) {
                 this._marker = new maptalks.Marker(e.coordinate, {
-                    'symbol' : {
-                        'markerType': 'ellipse',
-                        'markerFill': 'rgb(10,20,200)',
-                        'markerFillOpacity': 1,
-                        'markerLineColor': '#fff',
-                        'markerLineWidth': 1,
-                        'markerLineOpacity': 1,
-                        'markerWidth': 20,
-                        'markerHeight': 20,
-                        'markerDx': 0,
-                        'markerDy': 0
-                    }
+                    'symbol' : this.options['symbol']
                 }).addTo(this._mousemoveLayer);
             } else {
                 this._marker.setCoordinates(e.coordinate);
             }
-            var geos = this._findGeometry(e.coordinate);
-            if (geos.features.length > 0) {
-                console.log(geos.features.length);
-                const availLines = this._findLines(geos.features);
-                if (availLines.features.length > 0) {
-                    const _nearestLine = this._findNearestLine(availLines.features);
-                    const nearestLine = this._setEquation(_nearestLine);
-                    const verticalLine = this._setVertiEquation(nearestLine.A / nearestLine.B, this._marker.getCenter());
-                    const snapPoint = this._solveEquation(nearestLine, verticalLine);
-                    this._marker.setCoordinates([snapPoint.x, snapPoint.y]);
-                }
+            const availLines = this._findGeometry(e.coordinate);
+            if (availLines.features.length > 0) {
+                console.log(availLines.features.length);
+                const snapPoint = this._getSnapPoint(availLines);
+                this._marker.setCoordinates([snapPoint.x, snapPoint.y]);
             }
-            return geos;
         };
         map.on('mousemove', this._mousemove, this);
     }
@@ -146,12 +168,18 @@ export class SnapTool extends maptalks.MapTool {
     }
 
     _findGeometry(coordinate) {
-        const tolerance = (!this.options['tolerance']) ? 10 : this.options['tolerance'];
-        const availGeimetries = this._prepareGeometries(coordinate, tolerance);
+        const availGeimetries = this._prepareGeometries(coordinate);
         return availGeimetries;
     }
 
-    _compositLine(features) {
+    _getSnapPoint(availLines) {
+        const _nearestLine = this._findNearestLine(availLines.features);
+        const nearestLine = this._setEquation(_nearestLine);
+        const verticalLine = this._setVertiEquation(nearestLine.A / nearestLine.B, this._marker.getCenter());
+        const snapPoint = this._solveEquation(nearestLine, verticalLine);
+        return snapPoint;
+    }
+    /*_compositLine(features) {
         const geos = [];
         features.forEach(feature => {
             const coordinates = feature.geometry.coordinates;
@@ -174,7 +202,7 @@ export class SnapTool extends maptalks.MapTool {
             }
         });
         return geos;
-    }
+    }*/
 
     _snap() {
         const mousePoint = this._marker.toGeoJSON();
@@ -244,6 +272,7 @@ export class SnapTool extends maptalks.MapTool {
             C : C
         };
     }
+
     _solveEquation(equationW, equationU) {
         const A1 = equationW.A, B1 = equationW.B, C1 = equationW.C;
         const A2 = equationU.A, B2 = equationU.B, C2 = equationU.C;
