@@ -44,10 +44,10 @@ export class SnapTool extends maptalks.Class {
         return this._map;
     }
 
-    enable() {
+    enable(callback) {
         const map = this.getMap();
         if (this.allGeometries) {
-            this._registerEvents(map);
+            this._registerEvents(map, callback);
         }
     }
 
@@ -58,12 +58,12 @@ export class SnapTool extends maptalks.Class {
 
     setGeometries(geometries) {
         geometries = (geometries instanceof Array) ? geometries : [geometries];
-        this.allGeometries = geometries;
+        this.allGeometries = this._compositLine(geometries);
     }
 
     _prepareGeometries(coordinate) {
         if (this.allGeometries) {
-            const allGeoInGeojson = this._compositLine(this.allGeometries);
+            const allGeoInGeojson = this.allGeometries;
             this.tree.clear();
             this.tree.load({
                 'type': 'FeatureCollection',
@@ -77,22 +77,22 @@ export class SnapTool extends maptalks.Class {
     }
 
     _compositLine(geometries) {
-        const geos = [];
+        let geos = [];
         geometries.forEach(function (geo) {
             switch (geo.getType()) {
             case 'Point':
                 break;
             case 'Polyline':
-                this._parserGeometries(geo, 1);
+                geos = geos.concat(this._parserGeometries(geo, 1));
                 break;
             case 'Polygon':
-                this._parserGeometries(geo, 2);
+                geos = geos.concat(this._parserGeometries(geo, 2));
                 break;
             default:
                 break;
             }
 
-        });
+        }.bind(this));
         return geos;
     }
 
@@ -107,13 +107,9 @@ export class SnapTool extends maptalks.Class {
             coordinates.forEach(function (coords) {
                 const _lines = this._createLine(coords, _len, geo);
                 geos = geos.concat(_lines);
-            });
+            }.bind(this));
         }
         return geos;
-    }
-
-    _parserPolygon() {
-
     }
 
     _createLine(coordinates, _length, geo) {
@@ -147,7 +143,7 @@ export class SnapTool extends maptalks.Class {
             }
         };
     }
-    _registerEvents(map) {
+    _registerEvents(map, callback) {
         this._mousemove = function (e) {
             if (!this._marker) {
                 this._marker = new maptalks.Marker(e.coordinate, {
@@ -158,6 +154,7 @@ export class SnapTool extends maptalks.Class {
             }
             const availLines = this._findGeometry(e.coordinate);
             if (availLines.features.length > 0) {
+                if (callback) callback(availLines);
                 console.log(availLines.features.length);
                 const snapPoint = this._getSnapPoint(availLines);
                 this._marker.setCoordinates([snapPoint.x, snapPoint.y]);
