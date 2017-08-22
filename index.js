@@ -19,7 +19,7 @@ const options = {
 };
 
 
-export class SnapTool extends maptalks.Eventable {
+export class SnapTool extends maptalks.Class {
     constructor(options) {
         super(options);
         this.tree = rbush();
@@ -37,7 +37,11 @@ export class SnapTool extends maptalks.Eventable {
     addTo(map) {
         const id = `${maptalks.INTERNAL_LAYER_PREFIX}_snapto`;
         this._mousemoveLayer = new maptalks.VectorLayer(id).addTo(map);
-        return super.addTo(map);
+        this._map = map;
+    }
+
+    getMap() {
+        return this._map;
     }
 
     enable() {
@@ -75,30 +79,55 @@ export class SnapTool extends maptalks.Eventable {
     _compositLine(geometries) {
         const geos = [];
         geometries.forEach(function (geo) {
-            const coordinates = geo.getCoordinates();
-            let len = 0;
             switch (geo.getType()) {
             case 'Point':
                 break;
             case 'Polyline':
-                len = coordinates.length - 1;
+                this._parserGeometries(geo, 1);
                 break;
             case 'Polygon':
-                len = coordinates.length - 2;
+                this._parserGeometries(geo, 2);
                 break;
             default:
                 break;
             }
-            for (let i = 0; i < len; i++) {
-                const line = new maptalks.LineString([coordinates[i], coordinates[i + 1]], {
-                    properties : {
-                        obj : geo
-                    }
-                });
-                geos.push(line.toGeoJSON());
-            }
+
         });
         return geos;
+    }
+
+    _parserGeometries(geo, _len) {
+        const coordinates = geo.getCoordinates();
+        let geos = [];
+        //分两种情况，一种是单条线的， 另一种是多条线
+        if (coordinates[0].x && coordinates[0].y) {
+            const _lines = this._createLine(coordinates, _len, geo);
+            geos = geos.concat(_lines);
+        } else {
+            coordinates.forEach(function (coords) {
+                const _lines = this._createLine(coords, _len, geo);
+                geos = geos.concat(_lines);
+            });
+        }
+        return geos;
+    }
+
+    _parserPolygon() {
+
+    }
+
+    _createLine(coordinates, _length, geo) {
+        const lines = [];
+        const len = coordinates.length - _length;
+        for (let i = 0; i < len; i++) {
+            const line = new maptalks.LineString([coordinates[i], coordinates[i + 1]], {
+                properties : {
+                    obj : geo
+                }
+            });
+            lines.push(line.toGeoJSON());
+        }
+        return lines;
     }
     _createInspectExtent(coordinate) {
         const tolerance = (!this.options['tolerance']) ? 10 : this.options['tolerance'];
@@ -179,30 +208,6 @@ export class SnapTool extends maptalks.Eventable {
         const snapPoint = this._solveEquation(nearestLine, verticalLine);
         return snapPoint;
     }
-    /*_compositLine(features) {
-        const geos = [];
-        features.forEach(feature => {
-            const coordinates = feature.geometry.coordinates;
-            for (let i = 0; i < coordinates.length; i++) {
-                const coords = coordinates[i];
-                let len = coords.length - 1;
-                if (feature.geometry.type === 'polygon') {
-                    len = coords.length - 2;
-                } else if (feature.geometry.type === 'linestring') {
-                    len = coords.length - 1;
-                }
-                for (let j = 0; j < len; j++) {
-                    const line = new maptalks.LineString([coords[j], coords[j + 1]], {
-                        properties : {
-                            obj : feature.properties.obj
-                        }
-                    });
-                    geos.push(line.toGeoJSON());
-                }
-            }
-        });
-        return geos;
-    }*/
 
     _snap() {
         const mousePoint = this._marker.toGeoJSON();
