@@ -107,9 +107,11 @@ export class SnapTool extends maptalks.Class {
         let geos = [];
         geometries.forEach(function (geo) {
             switch (geo.getType()) {
-            case 'Point':
-                geo.toGeoJSON().properties = {};
-                geos.push();
+            case 'Point': {
+                const _geo = geo.toGeoJSON();
+                _geo.properties = {};
+                geos.push(_geo);
+            }
                 break;
             case 'LineString':
             case 'Polygon':
@@ -225,7 +227,10 @@ export class SnapTool extends maptalks.Class {
         }
         //when point, return itself
         if (_nearestGeometry.geometry.type === 'Point') {
-            return _nearestGeometry;
+            return {
+                x : _nearestGeometry.geometry.coordinates[0],
+                y : _nearestGeometry.geometry.coordinates[1]
+            };
         } else if (_nearestGeometry.geometry.type === 'LineString') {
             //when line,return the vertical insect point
             const nearestLine = this._setEquation(_nearestGeometry);
