@@ -3172,17 +3172,14 @@ var options = {
 };
 
 /**
- * Takes an array of LinearRings and optionally an {@link Object} with properties and returns a {@link Polygon} feature.
+ * A snap tool for snapping mouse point on geometries.
  *
- * @name polygon
- * @param {Array<Array<Array<number>>>} coordinates an array of LinearRings
- * @param {Object} [properties={}] an Object of key-value pairs to add as properties
- * @param {Array<number>} [bbox] BBox [west, south, east, north]
- * @param {string|number} [id] Identifier
- * @returns {Feature<Polygon>} a Polygon feature
- * @throws {Error} throw an error if a LinearRing of the polygon has too few positions
- * or if a LinearRing of the Polygon does not have matching Positions at the beginning & end.
- **/
+ * Thanks to rbush's author, this pluging has used the rbush to inspect surrounding geometries within tolerance(https://github.com/mourner/rbush)
+ *
+ * @author liubgithub(https://github.com/liubgithub)
+ *
+ * MIT License
+ */
 var SnapTool = function (_maptalks$Class) {
     _inherits(SnapTool, _maptalks$Class);
 
@@ -3192,7 +3189,6 @@ var SnapTool = function (_maptalks$Class) {
         var _this = _possibleConstructorReturn(this, _maptalks$Class.call(this, options));
 
         _this.tree = index();
-        //this._checkMode();
         return _this;
     }
 
@@ -3204,6 +3200,12 @@ var SnapTool = function (_maptalks$Class) {
         this.mode = mode;
     };
 
+    /**
+     * @param {Map} map object
+     * When using the snap tool, you should add it to a map firstly
+     */
+
+
     SnapTool.prototype.addTo = function addTo(map) {
         var id = maptalks.INTERNAL_LAYER_PREFIX + '_snapto';
         this._mousemoveLayer = new maptalks.VectorLayer(id).addTo(map);
@@ -3214,24 +3216,46 @@ var SnapTool = function (_maptalks$Class) {
         return this._map;
     };
 
-    SnapTool.prototype.enable = function enable(callback) {
+    /**
+     * Start snap interaction
+     */
+
+
+    SnapTool.prototype.enable = function enable() {
         var map = this.getMap();
         if (this.allGeometries) {
-            this._registerEvents(map, callback);
+            this._registerEvents(map);
         } else {
             throw new Error('you should set geometries which are snapped to firstly!');
         }
     };
+
+    /**
+     * End snap interaction
+     */
+
 
     SnapTool.prototype.disable = function disable() {
         var map = this.getMap();
         map.off('mousemove', this._mousemove);
     };
 
+    /**
+     * @param {Geometry||Array<Geometry>} geometries to snap to
+     * Set geomeries to an array for snapping to
+     */
+
+
     SnapTool.prototype.setGeometries = function setGeometries(geometries) {
         geometries = geometries instanceof Array ? geometries : [geometries];
         this.allGeometries = this._compositGeometries(geometries);
     };
+
+    /**
+     * @param {Layer} layer to snap to
+     * Set layer for snapping to
+     */
+
 
     SnapTool.prototype.setLayer = function setLayer(layer) {
         if (layer instanceof maptalks.VectorLayer) {
@@ -3248,6 +3272,12 @@ var SnapTool = function (_maptalks$Class) {
         var addGeometries = this._compositGeometries(geometries);
         this.allGeometries = this.allGeometries.concat(addGeometries);
     };
+
+    /**
+     * @param {Coordinate} mouse's coordinate on map
+     * Using a point to inspect the surrounding geometries
+     */
+
 
     SnapTool.prototype._prepareGeometries = function _prepareGeometries(coordinate) {
         if (this.allGeometries) {
@@ -3336,7 +3366,13 @@ var SnapTool = function (_maptalks$Class) {
         };
     };
 
-    SnapTool.prototype._registerEvents = function _registerEvents(map, callback) {
+    /**
+     * @param {Map}
+     * Register mousemove event
+     */
+
+
+    SnapTool.prototype._registerEvents = function _registerEvents(map) {
         this._mousemove = function (e) {
             this.mousePoint = e.coordinate;
             if (!this._marker) {
@@ -3348,8 +3384,6 @@ var SnapTool = function (_maptalks$Class) {
             }
             var availGeometries = this._findGeometry(e.coordinate);
             if (availGeometries.features.length > 0) {
-                if (callback) callback(availGeometries);
-                console.log(availGeometries.features.length);
                 var snapPoint = this._getSnapPoint(availGeometries);
                 if (snapPoint) {
                     this._marker.setCoordinates([snapPoint.x, snapPoint.y]);
@@ -3358,6 +3392,12 @@ var SnapTool = function (_maptalks$Class) {
         };
         map.on('mousemove', this._mousemove, this);
     };
+
+    /**
+     * @param {Array<geometry>} available geometries which are surrounded
+     * Calaculate the distance from mouse point to every geometry
+     */
+
 
     SnapTool.prototype._setDistance = function _setDistance(geos) {
         var geoObjects = [];
@@ -3372,11 +3412,11 @@ var SnapTool = function (_maptalks$Class) {
                 });
             } else if (geo.geometry.type === 'Point') {
                 var _distance = this._distToPoint(this.mousePoint, geo);
+                //Composite an object including geometry and distance
                 geoObjects.push({
                     geoObject: geo,
                     distance: _distance
                 });
-                //geo.properties.distance = distance;
             }
         }
         return geoObjects;
