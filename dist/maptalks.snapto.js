@@ -3360,23 +3360,32 @@ var SnapTool = function (_maptalks$Class) {
     };
 
     SnapTool.prototype._setDistance = function _setDistance(geos) {
+        var geoObjects = [];
         for (var i = 0; i < geos.length; i++) {
             var geo = geos[i];
             if (geo.geometry.type === 'LineString') {
                 var distance = this._distToPolyline(this.mousePoint, geo);
-                geo.properties.distance = distance;
+                //geo.properties.distance = distance;
+                geoObjects.push({
+                    geometry: geo,
+                    distance: distance
+                });
             } else if (geo.geometry.type === 'Point') {
                 var _distance = this._distToPoint(this.mousePoint, geo);
-                geo.properties.distance = _distance;
+                geoObjects.push({
+                    geoObject: geo,
+                    distance: _distance
+                });
+                //geo.properties.distance = distance;
             }
         }
-        return geos;
+        return geoObjects;
     };
 
     SnapTool.prototype._findNearestGeometries = function _findNearestGeometries(geos) {
-        geos = this._setDistance(geos);
-        geos = geos.sort(this._compare(geos, 'distance'));
-        return geos[0];
+        var geoObjects = this._setDistance(geos);
+        geoObjects = geoObjects.sort(this._compare(geoObjects, 'distance'));
+        return geoObjects[0];
     };
 
     SnapTool.prototype._findGeometry = function _findGeometry(coordinate) {
@@ -3386,19 +3395,20 @@ var SnapTool = function (_maptalks$Class) {
 
     SnapTool.prototype._getSnapPoint = function _getSnapPoint(availGeometries) {
         var _nearestGeometry = this._findNearestGeometries(availGeometries.features);
-        if (!this._validDistance(_nearestGeometry.properties.distance)) {
+        if (!this._validDistance(_nearestGeometry.distance)) {
             return null;
         }
         //when point, return itself
-        if (_nearestGeometry.geometry.type === 'Point') {
+        if (_nearestGeometry.geoObject.geometry.type === 'Point') {
             return {
-                x: _nearestGeometry.geometry.coordinates[0],
-                y: _nearestGeometry.geometry.coordinates[1]
+                x: _nearestGeometry.geoObject.geometry.coordinates[0],
+                y: _nearestGeometry.geoObject.geometry.coordinates[1]
             };
-        } else if (_nearestGeometry.geometry.type === 'LineString') {
+        } else if (_nearestGeometry.geoObject.geometry.type === 'LineString') {
             //when line,return the vertical insect point
-            var nearestLine = this._setEquation(_nearestGeometry);
+            var nearestLine = this._setEquation(_nearestGeometry.geoObject);
             var k = nearestLine.B / nearestLine.A;
+            //k must exist
             if (k) {
                 var verticalLine = this._setVertiEquation(k, this.mousePoint);
                 var snapPoint = this._solveEquation(nearestLine, verticalLine);
@@ -3408,21 +3418,6 @@ var SnapTool = function (_maptalks$Class) {
         return null;
     };
 
-    /*_getAllGeometries() {
-        let _allGeometries = [];
-        if (this._snapLayer) {
-            _allGeometries = this._snapLayer.getGeometries();
-        } else {
-            const map = this.getMap();
-            const layers = map.getLayers(function (layer) {
-                return (layer instanceof maptalks.VectorLayer);
-            });
-            layers.forEach(function (layer) {
-                _allGeometries = _allGeometries.concat(layer.getGeometries());
-            });
-        }
-        return _allGeometries;
-    }*/
     ///
 
 
@@ -3512,8 +3507,8 @@ var SnapTool = function (_maptalks$Class) {
 
     SnapTool.prototype._compare = function _compare(data, propertyName) {
         return function (object1, object2) {
-            var value1 = object1.properties[propertyName];
-            var value2 = object2.properties[propertyName];
+            var value1 = object1[propertyName];
+            var value2 = object2[propertyName];
             if (value2 < value1) {
                 return 1;
             } else if (value2 > value1) {
