@@ -196,23 +196,32 @@ export class SnapTool extends maptalks.Class {
     }
 
     _setDistance(geos) {
+        const geoObjects = [];
         for (let i = 0; i < geos.length; i++) {
             const geo = geos[i];
             if (geo.geometry.type === 'LineString') {
                 const distance = this._distToPolyline(this.mousePoint, geo);
-                geo.properties.distance = distance;
+                //geo.properties.distance = distance;
+                geoObjects.push({
+                    geometry : geo,
+                    distance : distance
+                });
             } else if (geo.geometry.type === 'Point') {
                 const distance = this._distToPoint(this.mousePoint, geo);
-                geo.properties.distance = distance;
+                geoObjects.push({
+                    geoObject : geo,
+                    distance : distance
+                });
+                //geo.properties.distance = distance;
             }
         }
-        return geos;
+        return geoObjects;
     }
 
     _findNearestGeometries(geos) {
-        geos = this._setDistance(geos);
-        geos = geos.sort(this._compare(geos, 'distance'));
-        return geos[0];
+        let geoObjects = this._setDistance(geos);
+        geoObjects = geoObjects.sort(this._compare(geoObjects, 'distance'));
+        return geoObjects[0];
     }
 
     _findGeometry(coordinate) {
@@ -222,19 +231,20 @@ export class SnapTool extends maptalks.Class {
 
     _getSnapPoint(availGeometries) {
         const _nearestGeometry = this._findNearestGeometries(availGeometries.features);
-        if (!this._validDistance(_nearestGeometry.properties.distance)) {
+        if (!this._validDistance(_nearestGeometry.distance)) {
             return null;
         }
         //when point, return itself
-        if (_nearestGeometry.geometry.type === 'Point') {
+        if (_nearestGeometry.geoObject.geometry.type === 'Point') {
             return {
-                x : _nearestGeometry.geometry.coordinates[0],
-                y : _nearestGeometry.geometry.coordinates[1]
+                x : _nearestGeometry.geoObject.geometry.coordinates[0],
+                y : _nearestGeometry.geoObject.geometry.coordinates[1]
             };
-        } else if (_nearestGeometry.geometry.type === 'LineString') {
+        } else if (_nearestGeometry.geoObject.geometry.type === 'LineString') {
             //when line,return the vertical insect point
-            const nearestLine = this._setEquation(_nearestGeometry);
+            const nearestLine = this._setEquation(_nearestGeometry.geoObject);
             const k = nearestLine.B / nearestLine.A;
+            //k must exist
             if (k) {
                 const verticalLine = this._setVertiEquation(k, this.mousePoint);
                 const snapPoint = this._solveEquation(nearestLine, verticalLine);
@@ -244,21 +254,6 @@ export class SnapTool extends maptalks.Class {
         return null;
     }
 
-    /*_getAllGeometries() {
-        let _allGeometries = [];
-        if (this._snapLayer) {
-            _allGeometries = this._snapLayer.getGeometries();
-        } else {
-            const map = this.getMap();
-            const layers = map.getLayers(function (layer) {
-                return (layer instanceof maptalks.VectorLayer);
-            });
-            layers.forEach(function (layer) {
-                _allGeometries = _allGeometries.concat(layer.getGeometries());
-            });
-        }
-        return _allGeometries;
-    }*/
     ///
     _toGeoJSON(geometries) {
         const _snapGeometries = [];
@@ -338,8 +333,8 @@ export class SnapTool extends maptalks.Class {
 
     _compare(data, propertyName) {
         return function (object1, object2) {
-            const value1 = object1.properties[propertyName];
-            const value2 = object2.properties[propertyName];
+            const value1 = object1[propertyName];
+            const value2 = object2[propertyName];
             if (value2 < value1) {
                 return 1;
             } else if (value2 > value1) {
