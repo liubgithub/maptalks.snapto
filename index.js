@@ -16,7 +16,7 @@ const options = {
 };
 
 /**
- * A snap tool for snapping mouse point on geometries, it extends maptalks.Class.
+ * A snap tool used for mouse point adsorb geometries, it extends maptalks.Class.
  *
  * Thanks to rbush's author, this pluging has used the rbush to inspect surrounding geometries within tolerance(https://github.com/mourner/rbush)
  *
@@ -31,25 +31,48 @@ export class SnapTool extends maptalks.Class {
     }
 
     getMode() {
-        return this.mode;
+        this._mode = !this._mode ? this.options['mode'] : this._mode;
+        if (this._checkMode(this._mode)) {
+            return this._mode;
+        } else {
+            throw new Error('snap mode is invalid');
+        }
     }
 
     setMode(mode) {
-        this.mode = mode;
+        if (this._checkMode(this._mode)) {
+            this._mode = mode;
+        } else {
+            throw new Error('snap mode is invalid');
+        }
     }
 
     /**
      * @param {Map} map object
-     * When using the snap tool, you should add it to a map firstly
+     * When using the snap tool, you should add it to a map firstly.the enable method excute default
      */
     addTo(map) {
         const id = `${maptalks.INTERNAL_LAYER_PREFIX}_snapto`;
         this._mousemoveLayer = new maptalks.VectorLayer(id).addTo(map);
         this._map = map;
+        this.allGeometries = [];
+        this.enable();
     }
 
     getMap() {
         return this._map;
+    }
+
+    /**
+     * @param {String} snap mode
+     * mode should be either 'point' or 'line'
+     */
+    _checkMode(mode) {
+        if (mode === 'point' || mode === 'line') {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -58,7 +81,9 @@ export class SnapTool extends maptalks.Class {
     enable() {
         const map = this.getMap();
         if (this.allGeometries) {
-            this._registerEvents(map);
+            if (!this._mousemove) {
+                this._registerEvents(map);
+            }
         } else {
             throw new Error('you should set geometries which are snapped to firstly!');
         }
@@ -70,6 +95,7 @@ export class SnapTool extends maptalks.Class {
     disable() {
         const map = this.getMap();
         map.off('mousemove', this._mousemove);
+        delete this._mousemove;
     }
 
     /**
@@ -92,6 +118,9 @@ export class SnapTool extends maptalks.Class {
             layer.on('addgeo', function (e) {
                 this._addGeometries(e.geometries);
             }, this);
+            layer.on('clear', function () {
+                this._clearGeometries();
+            }, this);
         }
     }
 
@@ -99,6 +128,10 @@ export class SnapTool extends maptalks.Class {
         geometries = (geometries instanceof Array) ? geometries : [geometries];
         const addGeometries = this._compositGeometries(geometries);
         this.allGeometries = this.allGeometries.concat(addGeometries);
+    }
+
+    _clearGeometries() {
+        this.addGeometries = [];
     }
 
     /**
@@ -122,6 +155,56 @@ export class SnapTool extends maptalks.Class {
     }
 
     _compositGeometries(geometries) {
+        let geos = [];
+        const mode = this.getMode();
+        if (mode === 'point') {
+            geos = this._compositToPoints(geometries);
+        } else if (mode === 'line') {
+            geos = this._compositToLines(geometries);
+        }
+        return geos;
+    }
+
+    _compositToPoints(geometries) {
+        let geos = [];
+        geometries.forEach(function (geo) {
+            geos = geos.concat(this._parserToPoints(geo));
+        }.bind(this));
+        return geos;
+    }
+
+    _createMarkers(coords) {
+        const markers = [];
+        coords.forEach(function (coord) {
+            let _geo = new maptalks.Marker(coord, {
+                properties:{}
+            });
+            _geo = _geo.toGeoJSON();
+            markers.push(_geo);
+        });
+        return markers;
+    }
+
+    _parserToPoints(geo) {
+        let coordinates = geo.getCoordinates();
+        let geos = [];
+        //two cases,one is single geometry,and another is multi geometries
+        if (coordinates[0] instanceof Array) {
+            coordinates.forEach(function (coords) {
+                const _markers = this._createMarkers(coords);
+                geos = geos.concat(_markers);
+            }.bind(this));
+        } else {
+            if (!(coordinates instanceof Array)) {
+                coordinates = [coordinates];
+            }
+            const _markers = this._createMarkers(coordinates);
+            geos = geos.concat(_markers);
+        }
+        return geos;
+    }
+
+    _compositToLines(geometries) {
         let geos = [];
         geometries.forEach(function (geo) {
             switch (geo.getType()) {
@@ -147,14 +230,14 @@ export class SnapTool extends maptalks.Class {
         const coordinates = geo.getCoordinates();
         let geos = [];
         //two cases,one is single geometry,and another is multi geometries
-        if (coordinates[0].x && coordinates[0].y) {
-            const _lines = this._createLine(coordinates, _len, geo);
-            geos = geos.concat(_lines);
-        } else {
+        if (coordinates[0] instanceof Array) {
             coordinates.forEach(function (coords) {
                 const _lines = this._createLine(coords, _len, geo);
                 geos = geos.concat(_lines);
             }.bind(this));
+        } else {
+            const _lines = this._createLine(coordinates, _len, geo);
+            geos = geos.concat(_lines);
         }
         return geos;
     }
@@ -257,52 +340,40 @@ export class SnapTool extends maptalks.Class {
 
     _getSnapPoint(availGeometries) {
         const _nearestGeometry = this._findNearestGeometries(availGeometries.features);
+        let snapPoint = null;
         if (!this._validDistance(_nearestGeometry.distance)) {
             return null;
         }
         //when point, return itself
         if (_nearestGeometry.geoObject.geometry.type === 'Point') {
-            return {
+            snapPoint = {
                 x : _nearestGeometry.geoObject.geometry.coordinates[0],
                 y : _nearestGeometry.geoObject.geometry.coordinates[1]
             };
         } else if (_nearestGeometry.geoObject.geometry.type === 'LineString') {
             //when line,return the vertical insect point
             const nearestLine = this._setEquation(_nearestGeometry.geoObject);
-            const k = nearestLine.B / nearestLine.A;
             //whether k exist
             if (nearestLine.A === 0) {
-                return {
+                snapPoint = {
                     x: this.mousePoint.x,
                     y: _nearestGeometry.geoObject.geometry.coordinates[0][1]
                 };
             } else if (nearestLine.A === Infinity) {
-                return {
+                snapPoint = {
                     x: _nearestGeometry.geoObject.geometry.coordinates[0][0],
                     y: this.mousePoint.y
                 };
             } else {
+                const k = nearestLine.B / nearestLine.A;
                 const verticalLine = this._setVertiEquation(k, this.mousePoint);
-                const snapPoint = this._solveEquation(nearestLine, verticalLine);
-                return snapPoint;
+                snapPoint = this._solveEquation(nearestLine, verticalLine);
             }
         }
-        return null;
+        return snapPoint;
     }
 
-    ///
-    _toGeoJSON(geometries) {
-        const _snapGeometries = [];
-        if (geometries instanceof Array) {
-            geometries.forEach(function (geo) {
-                const geojson = geo.toGeoJSON();
-                geojson.properties.obj = geo;
-                _snapGeometries.push(geojson);
-            });
-        }
-        return _snapGeometries;
-    }
-    //calaculate the distance from a point to a line
+    //Calaculate the distance from a point to a line
     _distToPolyline(point, line) {
         const equation = this._setEquation(line);
         const A = equation.A;
