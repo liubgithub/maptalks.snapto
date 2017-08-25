@@ -16,7 +16,7 @@ const options = {
 };
 
 /**
- * A snap tool for snapping mouse point on geometries.
+ * A snap tool for snapping mouse point on geometries, it extends maptalks.Class.
  *
  * Thanks to rbush's author, this pluging has used the rbush to inspect surrounding geometries within tolerance(https://github.com/mourner/rbush)
  *
@@ -229,7 +229,7 @@ export class SnapTool extends maptalks.Class {
                 const distance = this._distToPolyline(this.mousePoint, geo);
                 //geo.properties.distance = distance;
                 geoObjects.push({
-                    geometry : geo,
+                    geoObject : geo,
                     distance : distance
                 });
             } else if (geo.geometry.type === 'Point') {
@@ -270,8 +270,18 @@ export class SnapTool extends maptalks.Class {
             //when line,return the vertical insect point
             const nearestLine = this._setEquation(_nearestGeometry.geoObject);
             const k = nearestLine.B / nearestLine.A;
-            //k must exist
-            if (k) {
+            //whether k exist
+            if (nearestLine.A === 0) {
+                return {
+                    x: this.mousePoint.x,
+                    y: _nearestGeometry.geoObject.geometry.coordinates[0][1]
+                };
+            } else if (nearestLine.A === Infinity) {
+                return {
+                    x: _nearestGeometry.geoObject.geometry.coordinates[0][0],
+                    y: this.mousePoint.y
+                };
+            } else {
                 const verticalLine = this._setVertiEquation(k, this.mousePoint);
                 const snapPoint = this._solveEquation(nearestLine, verticalLine);
                 return snapPoint;
@@ -323,7 +333,7 @@ export class SnapTool extends maptalks.Class {
         const coords = line.geometry.coordinates;
         const from = coords[0];
         const to = coords[1];
-        const k = (from[1] - to[1]) / (from[0] - to[0]);
+        const k = Number((from[1] - to[1]) / (from[0] - to[0]).toString());
         const A = k;
         const B = -1;
         const C = from[1] - k * from[0];

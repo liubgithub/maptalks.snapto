@@ -3172,7 +3172,7 @@ var options = {
 };
 
 /**
- * A snap tool for snapping mouse point on geometries.
+ * A snap tool for snapping mouse point on geometries, it extends maptalks.Class.
  *
  * Thanks to rbush's author, this pluging has used the rbush to inspect surrounding geometries within tolerance(https://github.com/mourner/rbush)
  *
@@ -3407,7 +3407,7 @@ var SnapTool = function (_maptalks$Class) {
                 var distance = this._distToPolyline(this.mousePoint, geo);
                 //geo.properties.distance = distance;
                 geoObjects.push({
-                    geometry: geo,
+                    geoObject: geo,
                     distance: distance
                 });
             } else if (geo.geometry.type === 'Point') {
@@ -3448,8 +3448,18 @@ var SnapTool = function (_maptalks$Class) {
             //when line,return the vertical insect point
             var nearestLine = this._setEquation(_nearestGeometry.geoObject);
             var k = nearestLine.B / nearestLine.A;
-            //k must exist
-            if (k) {
+            //whether k exist
+            if (nearestLine.A === 0) {
+                return {
+                    x: this.mousePoint.x,
+                    y: _nearestGeometry.geoObject.geometry.coordinates[0][1]
+                };
+            } else if (nearestLine.A === Infinity) {
+                return {
+                    x: _nearestGeometry.geoObject.geometry.coordinates[0][0],
+                    y: this.mousePoint.y
+                };
+            } else {
                 var verticalLine = this._setVertiEquation(k, this.mousePoint);
                 var snapPoint = this._solveEquation(nearestLine, verticalLine);
                 return snapPoint;
@@ -3507,7 +3517,7 @@ var SnapTool = function (_maptalks$Class) {
         var coords = line.geometry.coordinates;
         var from = coords[0];
         var to = coords[1];
-        var k = (from[1] - to[1]) / (from[0] - to[0]);
+        var k = Number((from[1] - to[1]) / (from[0] - to[0]).toString());
         var A = k;
         var B = -1;
         var C = from[1] - k * from[0];
