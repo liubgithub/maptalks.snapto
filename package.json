@@ -1,11 +1,11 @@
 {
   "name": "maptalks.snapto",
-  "version": "0.2.0",
-  "description": "Snap interaction together with draw and modify interactions for geometries",
+  "version": "0.1.0",
+  "description": "A snap tool used for mouse point to adsorb geometries on map",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/fuzhenn/maptalks.snapto.git"
+    "url": "https://github.com/liubgithub/maptalks.snapto"
   },
   "main": "dist/maptalks.snapto.js",
   "scripts": {
@@ -44,7 +44,6 @@
     "maptalks": "^0.16.0"
   },
   "dependencies": {
-    "@turf/point-on-line": "^4.6.0",
     "geojson-rbush": "^1.1.1"
   }
 }
