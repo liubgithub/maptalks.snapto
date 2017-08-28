@@ -40,17 +40,16 @@ IE 9-11, Chrome, Firefox, other modern and mobile browsers.
 
 ## API Reference
 
-`setLayer(layer||maptalks.VectorLayer)` specify a layer which has geometries to snap to.
+###`setLayer(layer||maptalks.VectorLayer)` specify a layer which has geometries to snap to.
 
-`setGeometries(geometries||Array<maptalks.Geometry>)` specify a geometry collection to snap to.
+###`setGeometries(geometries||Array<maptalks.Geometry>)` specify a geometry collection to snap to.
 
-`enable()` start snap to.
+###`enable()` start snap to.
 
-`disable()` end snap to.
+###`disable()` end snap to.
 
-`setMode(mode||String)` set the snap strategy, when mode is 'point', it will snap to geometries's end points.
+###`setMode(mode||String)` set the snap strategy, when mode is 'point', it will snap to geometries's end points.
 
-### `snapto`
 ```
 
 ## Contributing
