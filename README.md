@@ -5,8 +5,6 @@
 
 A plugin used for mouse point to adsorb geometries, based on [snap interaction](http://openlayers.org/en/latest/examples/snap.html).
 
-![screenshot](https://cloud.githubusercontent.com/assets/13678919/25571325/335fdede-2e61-11e7-88c6-d3e0bac23e23.jpg)
-
 ## Install
   
 * Install with npm: ```npm install maptalks.snapto```. 
