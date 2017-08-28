@@ -16,7 +16,7 @@ const options = {
 };
 
 /**
- * A snap tool used for mouse point adsorb geometries, it extends maptalks.Class.
+ * A snap tool used for mouse point to adsorb geometries, it extends maptalks.Class.
  *
  * Thanks to rbush's author, this pluging has used the rbush to inspect surrounding geometries within tolerance(https://github.com/mourner/rbush)
  *

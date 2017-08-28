@@ -3,14 +3,14 @@
 [![CircleCI](https://circleci.com/gh/maptalks/maptalks.snapto.svg?style=shield)](https://circleci.com/gh/maptalks/maptalks.snapto)
 [![NPM Version](https://img.shields.io/npm/v/maptalks.snapto.svg)](https://github.com/maptalks/maptalks.snapto)
 
-A plugin to find self-intersections in a Polygon or MultiPolygon, based on [2d-polygon-self-intersections](https://github.com/tmpvar/2d-polygon-self-intersections).
+A plugin used for mouse point to adsorb geometries, based on [snap interaction](http://openlayers.org/en/latest/examples/snap.html).
 
 ![screenshot](https://cloud.githubusercontent.com/assets/13678919/25571325/335fdede-2e61-11e7-88c6-d3e0bac23e23.jpg)
 
 ## Install
   
 * Install with npm: ```npm install maptalks.snapto```. 
-* Download from [dist directory](https://github.com/maptalks/maptalks.snapto/tree/gh-pages/dist).
+* Download from [dist directory](https://github.com/maptalks/maptalks.snapto/master/dist).
 * Use unpkg CDN: ```https://unpkg.com/maptalks.snapto/dist/maptalks.snapto.min.js```
 
 ## Usage
@@ -20,50 +20,14 @@ As a plugin, ```maptalks.snapto``` must be loaded after ```maptalks.js``` in bro
 <script type="text/javascript" src="https://unpkg.com/maptalks/dist/maptalks.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/maptalks.snapto/dist/maptalks.snapto.min.js"></script>
 <script>
-//find intersections of polygon
-var polygon = new maptalks.Polygon([
-    [-10, 0],
-    [10, 0],
-    [10, 10],
-    [1, 10],
-    [1, -1],
-    [-1, -1],
-    [-1, 10],
-    [-10, 1]
-])
-.addTo(layer);
-
-var sects = polygon.snapto();
-
-//find intersections of MultiPolygon
-var multiPolygon = new maptalks.MultiPolygon([
-      [
-          [0, 20],
-          [20, 20],
-          [20, 30],
-          [11, 30],
-          [11, 11],
-          [9, 11],
-          [9, 30],
-          [0, 21]
-      ],
-      [
-          [-20, 20],
-          [0, 20],
-          [0, 30],
-          [-9, 30],
-          [-9, 11],
-          [-11, 11],
-          [-11, 30],
-          [-20, 21]
-      ]
-  ], {
-    symbol : {
-      'polygonFill' : '#00f'
-    }
-  }).addTo(layer);
-
-var mSects = multiPolygon.snapto();
+   var snap = new maptalks.SnapTool({
+                tolerance: 20,
+                mode : 'point'
+            });
+   snap.addTo(map);//when addto map, it will call enable method default.
+   snap.setLayer(layer);
+   //also you can use snap.setGeometries(geometries) to specify geometries which are snapped to.
+   //snap.enable();
 </script>
 ```
 ## Supported Browsers
@@ -72,75 +36,21 @@ IE 9-11, Chrome, Firefox, other modern and mobile browsers.
 
 ## Examples
 
-* [Self-intersections of polygons](https://maptalks.github.io/maptalks.snapto/demo/).
+* [See the demo](https://maptalks.github.io/maptalks.snapto/demo/index.html).
 
 ## API Reference
 
-`snapto` extends [Polygon](https://maptalks.github.io/docs/api/Polygon.html) class and [MultiPolygon](https://maptalks.github.io/docs/api/MultiPolygon.html) class by adding a new method `snapto` to find self-intersections.
+`setLayer(layer||maptalks.VectorLayer)` specify a layer which has geometries to snap to.
 
-### `snapto()`
+`setGeometries(geometries||Array<maptalks.Geometry>)` specify a geometry collection to snap to.
 
-Find self-intersections
+`enable()` start snap to.
 
-```javascript
-var snapto = polygon.snapto();
-var snapto2 = multiPolygon.snapto();
-```
+`disable()` end snap to.
 
-**Returns** `Array[]` an array containing ring indexes with self-intersections and intersections' coordinates, e.g.
+`setMode(mode||String)` set the snap strategy, when mode is 'point', it will snap to geometries's end points.
 
-```javascript
-var polygon = new maptalks.Polygon([
-    [-10, 0],
-    [10, 0],
-    [10, 10],
-    [1, 10],
-    [1, -1],
-    [-1, -1],
-    [-1, 10],
-    [-10, 1]
-]);
-var sects = polygon.snapto();
-```
-```javascript
-[
-  //[{ring index}, [{coordinates of intersections}]]
-  [0, [[1,0], [-1,0]]]
-]
-```
-
-```javascript
-//find intersections of MultiPolygon
-var multiPolygon = new maptalks.MultiPolygon([
-      [
-          [0, 20],
-          [20, 20],
-          [20, 30],
-          [11, 30],
-          [11, 11],
-          [9, 11],
-          [9, 30],
-          [0, 21]
-      ],
-      [
-          [-20, 20],
-          [0, 20],
-          [0, 30],
-          [-9, 30],
-          [-9, 11],
-          [-11, 11],
-          [-11, 30],
-          [-20, 21]
-      ]
-  ])
-var mSects = multiPolygon.snapto();
-```
-```javascript
-[
-  //[{polygon index}, [[{ring index}, [{coordinates of intersections}]]]]
-  [0,[[0,[[11,20],[9,20]]]]],
-  [1,[[0,[[-9,20],[-11,20]]]]]
-]
+### `snapto`
 ```
 
 ## Contributing
@@ -184,4 +94,3 @@ $ gulp minify
 ```shell
 $ npm run lint
 ```
-### 三个方法 startEdit、endEdit、findSnapPoint，两种模式，垂线，端点,接管鼠标事件
