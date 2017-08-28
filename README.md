@@ -8,7 +8,7 @@ A plugin used for mouse point to adsorb geometries, based on [snap interaction](
 ## Install
   
 * Install with npm: ```npm install maptalks.snapto```. 
-* Download from [dist directory](https://github.com/maptalks/maptalks.snapto/tree/master/dist).
+* Download from [dist directory](https://github.com/liubgithub/maptalks.snapto/tree/master/dist).
 * Use unpkg CDN: ```https://unpkg.com/maptalks.snapto/dist/maptalks.snapto.min.js```
 
 ## Usage
