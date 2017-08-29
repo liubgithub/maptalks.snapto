@@ -1,5 +1,5 @@
 /*!
- * maptalks.snapto v0.1.0
+ * maptalks.snapto v0.1.2
  * LICENSE : MIT
  * (c) 2016-2017 maptalks.org
  */
@@ -3172,7 +3172,7 @@ var options = {
 };
 
 /**
- * A snap tool used for mouse point adsorb geometries, it extends maptalks.Class.
+ * A snap tool used for mouse point to adsorb geometries, it extends maptalks.Class.
  *
  * Thanks to rbush's author, this pluging has used the rbush to inspect surrounding geometries within tolerance(https://github.com/mourner/rbush)
  *
@@ -3649,6 +3649,6 @@ exports.SnapTool = SnapTool;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-typeof console !== 'undefined' && console.log('maptalks.snapto v0.1.0, requires maptalks@^0.16.0.');
+typeof console !== 'undefined' && console.log('maptalks.snapto v0.1.2, requires maptalks@^0.16.0.');
 
 })));

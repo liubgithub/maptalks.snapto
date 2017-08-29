@@ -26,6 +26,7 @@ As a plugin, ```maptalks.snapto``` must be loaded after ```maptalks.js``` in bro
    snap.setLayer(layer);
    //also you can use snap.setGeometries(geometries) to specify geometries which are snapped to.
    //snap.enable();
+   //You can also use 'import { SnapTool } from 'maptalks.snapto'' when develope with webpack
 </script>
 ```
 ## Supported Browsers
@@ -46,7 +47,7 @@ IE 9-11, Chrome, Firefox, other modern and mobile browsers.
 
 `disable()` end snap to.
 
-`setMode(mode||String)` set the snap strategy, when mode is 'point', it will snap to geometries's end points.
+`setMode(mode||String)` set the snap strategy, when mode is 'point', it will snap to geometries's end points.When it set to 'line',it will snap a point which is mearest to mouse on a LineString.
 
 ### `...`
 ```
