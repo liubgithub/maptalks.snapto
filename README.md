@@ -13,7 +13,7 @@ A plugin used for mouse point to adsorb geometries, based on [snap interaction](
 
 ## Usage
 
-As a plugin, ```maptalks.snapto``` must be loaded after ```maptalks.js``` in browsers.
+As a plugin, ```maptalks.snapto``` must be loaded after ```maptalks.js``` in browsers. You can also use ```'import { SnapTool } from "maptalks.snapto"``` when develope with webpack.
 ```html
 <script type="text/javascript" src="https://unpkg.com/maptalks/dist/maptalks.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/maptalks.snapto/dist/maptalks.snapto.min.js"></script>
@@ -26,7 +26,6 @@ As a plugin, ```maptalks.snapto``` must be loaded after ```maptalks.js``` in bro
    snap.setLayer(layer);
    //also you can use snap.setGeometries(geometries) to specify geometries which are snapped to.
    //snap.enable();
-   //You can also use 'import { SnapTool } from 'maptalks.snapto'' when develope with webpack
 </script>
 ```
 ## Supported Browsers
