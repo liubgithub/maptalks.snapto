@@ -3168,7 +3168,8 @@ var options = {
         'markerLineOpacity': 1,
         'markerWidth': 15,
         'markerHeight': 15
-    }
+    },
+    'anchor': true
 };
 
 /**
@@ -3223,6 +3224,13 @@ var SnapTool = function (_maptalks$Class) {
         this.enable();
     };
 
+    SnapTool.prototype.remove = function remove() {
+        this.disable();
+        if (this._mousemoveLayer) {
+            this._mousemoveLayer.remove();
+        }
+    };
+
     SnapTool.prototype.getMap = function getMap() {
         return this._map;
     };
@@ -3265,6 +3273,10 @@ var SnapTool = function (_maptalks$Class) {
     SnapTool.prototype.disable = function disable() {
         var map = this.getMap();
         map.off('mousemove', this._mousemove);
+        if (this._mousemoveLayer) {
+            this._mousemoveLayer.clear();
+            this._mousemoveLayer.hide();
+        }
         delete this._mousemove;
     };
 
@@ -3290,10 +3302,33 @@ var SnapTool = function (_maptalks$Class) {
             var geometries = layer.getGeometries();
             this.allGeometries = this._compositGeometries(geometries);
             layer.on('addgeo', function (e) {
+                /*const geos = e.geometries;
+                const len = geos.length;
+                const geo = geos[len - 1];
+                if (this.options['anchor'] && this.snapPoint) {
+                    const lastCoord = geo.getLastCoordinate();
+                    lastCoord.x = this.snapPoint.x;
+                    lastCoord.y = this.snapPoint.y;
+                }*/
                 this._addGeometries(e.geometries);
             }, this);
             layer.on('clear', function () {
                 this._clearGeometries();
+            }, this);
+            this._mousemoveLayer.bringToFront();
+        }
+    };
+
+    SnapTool.prototype.bindDrawTool = function bindDrawTool(drawTool) {
+        if (drawTool instanceof maptalks.DrawTool) {
+            drawTool.on('mousemove', function (e) {
+                if (this.snapPoint) {
+                    var geometry = e.target._geometry;
+                    var coords = geometry.getCoordinates();
+                    coords[coords.length - 1].x = this.snapPoint.x;
+                    coords[coords.length - 1].y = this.snapPoint.y;
+                    geometry.setCoordinates(coords);
+                }
             }, this);
         }
     };
@@ -3469,10 +3504,12 @@ var SnapTool = function (_maptalks$Class) {
             }
             var availGeometries = this._findGeometry(e.coordinate);
             if (availGeometries.features.length > 0) {
-                var snapPoint = this._getSnapPoint(availGeometries);
-                if (snapPoint) {
-                    this._marker.setCoordinates([snapPoint.x, snapPoint.y]);
+                this.snapPoint = this._getSnapPoint(availGeometries);
+                if (this.snapPoint) {
+                    this._marker.setCoordinates([this.snapPoint.x, this.snapPoint.y]);
                 }
+            } else {
+                this.snapPoint = null;
             }
         };
         map.on('mousemove', this._mousemove, this);
