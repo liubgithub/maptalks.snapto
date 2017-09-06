@@ -119,7 +119,7 @@ export class SnapTool extends maptalks.Class {
     }
 
     /**
-     * @param {Layer} layer to snap to
+     * @param {Layer||maptalk.VectorLayer} layer to snap to
      * Set layer for snapping to
      */
     setLayer(layer) {
@@ -127,14 +127,6 @@ export class SnapTool extends maptalks.Class {
             const geometries = layer.getGeometries();
             this.allGeometries = this._compositGeometries(geometries);
             layer.on('addgeo', function (e) {
-                /*const geos = e.geometries;
-                const len = geos.length;
-                const geo = geos[len - 1];
-                if (this.options['anchor'] && this.snapPoint) {
-                    const lastCoord = geo.getLastCoordinate();
-                    lastCoord.x = this.snapPoint.x;
-                    lastCoord.y = this.snapPoint.y;
-                }*/
                 this._addGeometries(e.geometries);
             }, this);
             layer.on('clear', function () {
@@ -144,18 +136,55 @@ export class SnapTool extends maptalks.Class {
         }
     }
 
+    /**
+     * @param {drawTool||maptalks.DrawTool} drawing tool
+     * When interacting with a drawtool, you should bind the drawtool object to this snapto tool
+     */
     bindDrawTool(drawTool) {
         if (drawTool instanceof maptalks.DrawTool) {
-            drawTool.on('mousemove', function (e) {
+            drawTool.on('drawstart', (e) => {
                 if (this.snapPoint) {
-                    const geometry = e.target._geometry;
-                    const coords = geometry.getCoordinates();
-                    coords[coords.length - 1].x = this.snapPoint.x;
-                    coords[coords.length - 1].y = this.snapPoint.y;
-                    geometry.setCoordinates(coords);
+                    this._resetCoordinates(e.target._geometry, this.snapPoint);
+                    this._resetClickPoint(e.target._clickCoords, this.snapPoint);
+                }
+            }, this);
+            drawTool.on('mousemove', (e) => {
+                if (this.snapPoint) {
+                    this._resetCoordinates(e.target._geometry, this.snapPoint);
+                }
+            }, this);
+            drawTool.on('drawvertex', (e) => {
+                if (this.snapPoint) {
+                    this._resetCoordinates(e.target._geometry, this.snapPoint);
+                    this._resetClickPoint(e.target._clickCoords, this.snapPoint);
+                }
+            }, this);
+            drawTool.on('drawend', (e) => {
+                if (this.snapPoint) {
+                    const geometry = e.geometry;
+                    this._resetCoordinates(geometry, this.snapPoint);
                 }
             }, this);
         }
+    }
+
+    _resetCoordinates(geometry, snapPoint) {
+        var coords = geometry.getCoordinates();
+        if (coords instanceof Array) {
+            coords[coords.length - 1].x = snapPoint.x;
+            coords[coords.length - 1].y = snapPoint.y;
+        } else if (coords instanceof maptalks.Coordinate) {
+            coords.x = snapPoint.x;
+            coords.y = snapPoint.y;
+        }
+        geometry.setCoordinates(coords);
+        return geometry;
+    }
+
+    _resetClickPoint(clickCoords, snapPoint) {
+        const _clickCoords = clickCoords;
+        _clickCoords[_clickCoords.length - 1].x = snapPoint.x;
+        _clickCoords[_clickCoords.length - 1].y = snapPoint.y;
     }
 
     _addGeometries(geometries) {
