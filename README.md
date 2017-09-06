@@ -24,8 +24,9 @@ As a plugin, ```maptalks.snapto``` must be loaded after ```maptalks.js``` in bro
             });
    snap.addTo(map);//when addto map, it will call enable method default.
    snap.setLayer(layer);
-   //also you can use snap.setGeometries(geometries) to specify geometries which are snapped to.
-   //snap.enable();
+   //If you draw geometries on map with a drawing tool, you should bind the maptalks.DrawTool object to the snapto tool.
+   var drawtool = new maptalks.DrawTool();
+   snap.bindDrawTool(drawtool);
 </script>
 ```
 ## Supported Browsers
@@ -41,6 +42,8 @@ IE 9-11, Chrome, Firefox, other modern and mobile browsers.
 `setLayer(layer||maptalks.VectorLayer)` specify a layer which has geometries to snap to.
 
 `setGeometries(geometries||Array<maptalks.Geometry>)` specify a geometry collection to snap to.
+
+`bindDrawTool(drawtool||maptalks.DrawTool)` When interacting with a drawtool, you should bind the drawtool object to this snapto tool
 
 `enable()` start snap to.
 
