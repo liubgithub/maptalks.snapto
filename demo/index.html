@@ -79,6 +79,7 @@
             });
             snap.addTo(map);
             snap.setLayer(layer);
+            snap.bindDrawTool(drawTool);
             //snap.enable();
             drawTool.on('drawstart', function () {
                 //layer.clear();

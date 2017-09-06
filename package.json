@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/liubgithub/maptalks.snapto"
   },
-  "main": "dist/maptalks.snapto.js",
+  "main": "dist/maptalks.snapto.min.js",
   "scripts": {
     "preversion": "npm test",
     "version": "gulp minify && git add -A dist",
