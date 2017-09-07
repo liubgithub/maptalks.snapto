@@ -64,6 +64,7 @@ export class SnapTool extends maptalks.Class {
         this.disable();
         if (this._mousemoveLayer) {
             this._mousemoveLayer.remove();
+            delete this._mousemoveLayer;
         }
     }
     getMap() {
@@ -91,6 +92,9 @@ export class SnapTool extends maptalks.Class {
             if (!this._mousemove) {
                 this._registerEvents(map);
             }
+            if (this._mousemoveLayer) {
+                this._mousemoveLayer.show();
+            }
         } else {
             throw new Error('you should set geometries which are snapped to firstly!');
         }
@@ -103,7 +107,6 @@ export class SnapTool extends maptalks.Class {
         const map = this.getMap();
         map.off('mousemove', this._mousemove);
         if (this._mousemoveLayer) {
-            this._mousemoveLayer.clear();
             this._mousemoveLayer.hide();
         }
         delete this._mousemove;

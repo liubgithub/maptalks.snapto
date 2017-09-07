@@ -1,5 +1,5 @@
 /*!
- * maptalks.snapto v0.1.2
+ * maptalks.snapto v0.1.3
  * LICENSE : MIT
  * (c) 2016-2017 maptalks.org
  */
@@ -3228,6 +3228,7 @@ var SnapTool = function (_maptalks$Class) {
         this.disable();
         if (this._mousemoveLayer) {
             this._mousemoveLayer.remove();
+            delete this._mousemoveLayer;
         }
     };
 
@@ -3260,6 +3261,9 @@ var SnapTool = function (_maptalks$Class) {
             if (!this._mousemove) {
                 this._registerEvents(map);
             }
+            if (this._mousemoveLayer) {
+                this._mousemoveLayer.show();
+            }
         } else {
             throw new Error('you should set geometries which are snapped to firstly!');
         }
@@ -3274,7 +3278,6 @@ var SnapTool = function (_maptalks$Class) {
         var map = this.getMap();
         map.off('mousemove', this._mousemove);
         if (this._mousemoveLayer) {
-            this._mousemoveLayer.clear();
             this._mousemoveLayer.hide();
         }
         delete this._mousemove;
@@ -3719,6 +3722,6 @@ exports.SnapTool = SnapTool;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-typeof console !== 'undefined' && console.log('maptalks.snapto v0.1.2, requires maptalks@^0.16.0.');
+typeof console !== 'undefined' && console.log('maptalks.snapto v0.1.3, requires maptalks@^0.16.0.');
 
 })));
