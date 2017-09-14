@@ -24,34 +24,16 @@
         var map;
         function initMap() {
             map = new maptalks.Map('map', {
-                center: [109.20749554050774, 34.36776742218806], //[109.20749554050774, 34.36776742218806], //[175.27, -37.79],
-                zoom: 3,
+                center: [113.905784, 30.321769],
+                zoom: 10,
                 minZoom: 1,
-                maxZoom: 10,
+                maxZoom: 19,
                 view: {
-                    projection: 'EPSG:4326',
-                    resolutions: [
-                        0.0013748335334806893,
-                        0.0006874167667403447,
-                        3.4370838337017233E-4,
-                        1.7185419168508616E-4,
-                        8.592709584254308E-5,
-                        4.296354792127154E-5,
-                        2.148177396063577E-5,
-                        1.0740886980317885E-5,
-                        5.370443490158943E-6,
-                        2.684032014576556E-6
-                    ],
-                    fullExtent: {
-                        'top': 90,
-                        'bottom': 0,
-                        'left': 0,
-                        'right': 180
-                    }
+                    projection: 'baidu'
                 },
-                baseLayer: new maptalks.TileLayer('tile', {
-                    tileSystem: [1, -1, -400, 400],
-                    urlTemplate: 'http://117.36.75.134:6080/arcgis/rest/services/LT/DeepBlueMap0928touming/MapServer/tile/{z}/{y}/{x}'
+                baseLayer: new maptalks.TileLayer('base', {
+                    urlTemplate: 'http://api2.map.bdimg.com/customimage/tile?&x={x}&y={y}&z={z}&udt=20161109&scale=1&styles=t%3Awater%7Ce%3Aall%7Cc%3A%23044161%2Ct%3Aland%7Ce%3Aall%7Cc%3A%23091934%2Ct%3Aboundary%7Ce%3Ag%7Cc%3A%23064f85%2Ct%3Arailway%7Ce%3Aall%7Cv%3Aoff%2Ct%3Ahighway%7Ce%3Ag%7Cc%3A%23004981%2Ct%3Ahighway%7Ce%3Ag.f%7Cc%3A%23005b96%7Cl%3A1%2Ct%3Ahighway%7Ce%3Al%7Cv%3Aon%2Ct%3Aarterial%7Ce%3Ag%7Cc%3A%23004981%7Cl%3A-39%2Ct%3Aarterial%7Ce%3Ag.f%7Cc%3A%2300508b%2Ct%3Agreen%7Ce%3Aall%7Cv%3Aoff%7Cc%3A%23056197%2Ct%3Asubway%7Ce%3Aall%7Cv%3Aoff%2Ct%3Amanmade%7Ce%3Aall%7Cv%3Aoff%2Ct%3Alocal%7Ce%3Aall%7Cv%3Aoff%2Ct%3Aarterial%7Ce%3Al%7Cv%3Aon%2Ct%3Aboundary%7Ce%3Ag.f%7Cc%3A%23029fd4%2Ct%3Abuilding%7Ce%3Aall%7Cc%3A%231a5787%2Ct%3Apoi%7Ce%3Aall%7Cv%3Aoff%2Ct%3Aall%7Ce%3Al%7Cv%3Aoff',
+                    subdomains: [2]
                 })
             });
         }
