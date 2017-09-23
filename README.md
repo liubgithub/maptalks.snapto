@@ -1,6 +1,6 @@
 # maptalks.snapto
 
-[![CircleCI](https://circleci.com/gh/maptalks/maptalks.snapto.svg?style=shield)](https://circleci.com/gh/maptalks/maptalks.snapto)
+[![CircleCI](https://circleci.com/gh/liubgithub/maptalks.snapto.svg?style=svg)](https://circleci.com/gh/liubgithub/maptalks.snapto)
 [![NPM Version](https://img.shields.io/npm/v/maptalks.snapto.svg)](https://github.com/maptalks/maptalks.snapto)
 
 A plugin used for mouse point to adsorb geometries, similar to [snap interaction](http://openlayers.org/en/latest/examples/snap.html).
