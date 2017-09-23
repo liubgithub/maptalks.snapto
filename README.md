@@ -35,7 +35,7 @@ IE 9-11, Chrome, Firefox, other modern and mobile browsers.
 
 ## Examples
 
-* [See the demo](https://maptalks.github.io/maptalks.snapto/demo/index.html).
+* [See the demo](https://liubgithub.github.io/maptalks.snapto/demo/index.html).
 
 ## API Reference
 
