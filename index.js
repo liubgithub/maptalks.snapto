@@ -172,8 +172,11 @@ export class SnapTool extends maptalks.Class {
     }
 
     _resetCoordinates(geometry, snapPoint) {
-        var coords = geometry.getCoordinates();
-        if (coords instanceof Array) {
+        const coords = geometry.getCoordinates();
+        if (geometry instanceof maptalks.Polygon) {
+            const coordinates = coords[0];
+            coordinates.splice(coordinates.length - 2, 1);
+        } else if (coords instanceof Array) {
             coords[coords.length - 1].x = snapPoint.x;
             coords[coords.length - 1].y = snapPoint.y;
         } else if (coords instanceof maptalks.Coordinate) {
@@ -185,9 +188,8 @@ export class SnapTool extends maptalks.Class {
     }
 
     _resetClickPoint(clickCoords, snapPoint) {
-        const _clickCoords = clickCoords;
-        _clickCoords[_clickCoords.length - 1].x = snapPoint.x;
-        _clickCoords[_clickCoords.length - 1].y = snapPoint.y;
+        clickCoords[clickCoords.length - 1].x = snapPoint.x;
+        clickCoords[clickCoords.length - 1].y = snapPoint.y;
     }
 
     _addGeometries(geometries) {
@@ -370,7 +372,7 @@ export class SnapTool extends maptalks.Class {
 
     /**
      * @param {Array<geometry>} available geometries which are surrounded
-     * Calaculate the distance from mouse point to every geometry
+     * Calculate the distance from mouse point to every geometry
      */
     _setDistance(geos) {
         const geoObjects = [];
@@ -441,7 +443,7 @@ export class SnapTool extends maptalks.Class {
         return snapPoint;
     }
 
-    //Calaculate the distance from a point to a line
+    //Calculate the distance from a point to a line
     _distToPolyline(point, line) {
         const equation = this._setEquation(line);
         const A = equation.A;
@@ -522,4 +524,3 @@ export class SnapTool extends maptalks.Class {
 }
 
 SnapTool.mergeOptions(options);
-
