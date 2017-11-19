@@ -215,7 +215,6 @@ export class SnapTool extends maptalks.Class {
                 'features':allGeoInGeojson
             });
             this.inspectExtent = this._createInspectExtent(coordinate);
-            //the search result's structure should be remembered
             const availGeometries = this.tree.search(this.inspectExtent);
             return availGeometries;
         }
@@ -414,16 +413,16 @@ export class SnapTool extends maptalks.Class {
         if (!this._validDistance(_nearestGeometry.distance)) {
             return null;
         }
-        //when point, return itself
+        //when it's point, return itself
         if (_nearestGeometry.geoObject.geometry.type === 'Point') {
             snapPoint = {
                 x : _nearestGeometry.geoObject.geometry.coordinates[0],
                 y : _nearestGeometry.geoObject.geometry.coordinates[1]
             };
         } else if (_nearestGeometry.geoObject.geometry.type === 'LineString') {
-            //when line,return the vertical insect point
+            //when it's line,return the vertical insect point
             const nearestLine = this._setEquation(_nearestGeometry.geoObject);
-            //whether k exist
+            //whether k exists
             if (nearestLine.A === 0) {
                 snapPoint = {
                     x: this.mousePoint.x,
