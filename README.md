@@ -3,7 +3,7 @@
 [![CircleCI](https://circleci.com/gh/liubgithub/maptalks.snapto.svg?style=svg)](https://circleci.com/gh/liubgithub/maptalks.snapto)
 [![NPM Version](https://img.shields.io/npm/v/maptalks.snapto.svg)](https://github.com/maptalks/maptalks.snapto)
 
-A plugin used for mouse point to adsorb geometries, similar to [snap interaction](http://openlayers.org/en/latest/examples/snap.html).
+A plugin used for mouse point to adsorb geometries, inspired by [snap interaction](http://openlayers.org/en/latest/examples/snap.html).
 
 ## Install
   
@@ -50,7 +50,7 @@ IE 9-11, Chrome, Firefox, other modern and mobile browsers.
 `disable()` end snap to.
 
 `setMode(mode||String)` set the snapping strategy, when mode is 'point', it will snap to geometries's end points. When it set to 'line',it will snap a point which is mearest to mouse on a LineString.
-```
+
 
 ## Contributing
 
