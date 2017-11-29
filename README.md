@@ -38,7 +38,18 @@ IE 9-11, Chrome, Firefox, other modern and mobile browsers.
 
 ## API Reference
 
-`setLayer(layer||maptalks.VectorLayer)` specify a layer which has geometries to snap to.
+### `Constructor`
+
+```javascript
+new maptalks.ClusterLayer(options)
+```
+
+* options **Object** options
+    * mode **String** there are two modes, line and point, default is line. 
+    * tolerance **Number** the distance in pixel from mouse to the snap point, default is 10.
+    * symbol **Object** symbol of the mouse point.
+
+`setLayer(layer||maptalks.VectorLayer)` specify a vectorlayer which has geometries to snap to.
 
 `setGeometries(geometries||Array<maptalks.Geometry>)` specify a geometry collection to snap to.
 
@@ -48,7 +59,7 @@ IE 9-11, Chrome, Firefox, other modern and mobile browsers.
 
 `disable()` end snap to.
 
-`setMode(mode||String)` set the snapping strategy, when mode is 'point', it will snap to geometries's end points. When it set to 'line',it will snap a point which is mearest to mouse on a LineString.
+`setMode(mode||String)` set the snapping strategy, when mode is 'point', it will snap to geometries's end points. When it set to 'line',it will snap a point which is nearest to mouse on a LineString or Polygon.
 
 
 ## Contributing
