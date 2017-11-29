@@ -24,16 +24,13 @@
         var map;
         function initMap() {
             map = new maptalks.Map('map', {
-                center: [113.905784, 30.321769],
+                center: [114.295784, 30.631769],
                 zoom: 10,
                 minZoom: 1,
                 maxZoom: 19,
-                view: {
-                    projection: 'baidu'
-                },
-                baseLayer: new maptalks.TileLayer('base', {
-                    urlTemplate: 'https://api2.map.bdimg.com/customimage/tile?&x={x}&y={y}&z={z}&udt=20161109&scale=1&styles=t%3Awater%7Ce%3Aall%7Cc%3A%23044161%2Ct%3Aland%7Ce%3Aall%7Cc%3A%23091934%2Ct%3Aboundary%7Ce%3Ag%7Cc%3A%23064f85%2Ct%3Arailway%7Ce%3Aall%7Cv%3Aoff%2Ct%3Ahighway%7Ce%3Ag%7Cc%3A%23004981%2Ct%3Ahighway%7Ce%3Ag.f%7Cc%3A%23005b96%7Cl%3A1%2Ct%3Ahighway%7Ce%3Al%7Cv%3Aon%2Ct%3Aarterial%7Ce%3Ag%7Cc%3A%23004981%7Cl%3A-39%2Ct%3Aarterial%7Ce%3Ag.f%7Cc%3A%2300508b%2Ct%3Agreen%7Ce%3Aall%7Cv%3Aoff%7Cc%3A%23056197%2Ct%3Asubway%7Ce%3Aall%7Cv%3Aoff%2Ct%3Amanmade%7Ce%3Aall%7Cv%3Aoff%2Ct%3Alocal%7Ce%3Aall%7Cv%3Aoff%2Ct%3Aarterial%7Ce%3Al%7Cv%3Aon%2Ct%3Aboundary%7Ce%3Ag.f%7Cc%3A%23029fd4%2Ct%3Abuilding%7Ce%3Aall%7Cc%3A%231a5787%2Ct%3Apoi%7Ce%3Aall%7Cv%3Aoff%2Ct%3Aall%7Ce%3Al%7Cv%3Aoff',
-                    subdomains: [2]
+                baseLayer: new maptalks.TileLayer('tile', {
+                    'urlTemplate': 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png',
+                    'subdomains': ['a', 'b', 'c', 'd']
                 })
             });
         }
@@ -42,32 +39,40 @@
             var layer = new maptalks.VectorLayer('layer').addTo(map);
             var drawTool = new maptalks.DrawTool({
                 symbol:{
-                    'markerType': 'ellipse',
-                    'markerFill': '#f00',
-                    'markerLineColor': '#fff',
+                    /*'markerType': 'ellipse',
+                    'markerFill': '#0ff',
+                    'markerLineColor': '#0f0',
                     'markerLineWidth': 2,
                     'markerLineOpacity': 1,
-                    'markerWidth': 15,
-                    'markerHeight': 15,
-                    lineColor: '#f00',
-                    polygonFill: '#0f0',
-                    polygonOpacity:0.6
+                    'markerWidth': 10,
+                    'markerHeight': 10,*/
+                    'lineColor': '#f00',
+                    'polygonFill': '#0f0',
+                    'polygonOpacity':0.6
                 },
                 mode: 'Point'
             }).addTo(map).disable();
             var snap = new maptalks.SnapTool({
-                tolerance: 20,
-                mode : 'point'
+                tolerance: 10,
+                mode : 'line'
             });
             snap.addTo(map);
             snap.setLayer(layer);
             snap.bindDrawTool(drawTool);
             //snap.enable();
-            drawTool.on('drawstart', function () {
-                //layer.clear();
-            });
             drawTool.on('drawend', function (param) {
                 var geo = param.geometry;
+                if (geo.getType() === 'Point') {
+                    geo.updateSymbol({
+                        'markerType': 'ellipse',
+                        'markerFill': '#0ff',
+                        'markerLineColor': '#0f0',
+                        'markerLineWidth': 2,
+                        'markerLineOpacity': 1,
+                        'markerWidth': 10,
+                        'markerHeight': 10
+                    });
+                }
                 layer.addGeometry(geo);
             });
             var items = ['Point', 'LineString', 'Polygon', 'Circle', 'Ellipse', 'Rectangle'].map(function (value) {
@@ -78,22 +83,33 @@
                     }
                 };
             });
-
+            var modes = ['point', 'line'].map(function (value) {
+                return {
+                    item: value,
+                    click: function () {
+                        snap.setMode(value);
+                    }
+                };
+            });
             var toolbar = new maptalks.control.Toolbar({
                 items: [{
                     item: 'Shape',
                     children: items
                 },
                     {
+                        item:'Mode',
+                        children:modes
+                    },
+                    {
                         item: 'Disable',
                         click: function () {
-                            drawTool.disable();
+                            snap.disable();
                         }
                     },
                     {
-                        item: 'Clear',
+                        item: 'Start',
                         click: function () {
-                            layer.clear();
+                            snap.enable();
                         }
                     }
                 ]
