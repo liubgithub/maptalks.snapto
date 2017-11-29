@@ -41,13 +41,12 @@ IE 9-11, Chrome, Firefox, other modern and mobile browsers.
 ### `Constructor`
 
 ```javascript
-new maptalks.ClusterLayer(options)
+new maptalks.SnapTool(options)
 ```
-
 * options **Object** options
-    * mode **String** there are two modes, line and point, default is line. 
-    * tolerance **Number** the distance in pixel from mouse to the snap point, default is 10.
-    * symbol **Object** symbol of the mouse point.
+    * mode **String**   there are two modes, line and point, default is line. 
+    * tolerance **Number**    the distance in pixel from mouse to the snap point, default is 10.
+    * symbol **Object**    symbol of the mouse point.
 
 `setLayer(layer||maptalks.VectorLayer)` specify a vectorlayer which has geometries to snap to.
 
