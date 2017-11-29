@@ -12,8 +12,7 @@ const options = {
         'markerLineOpacity': 1,
         'markerWidth': 15,
         'markerHeight': 15
-    },
-    'anchor':true
+    }
 };
 
 /**
@@ -43,6 +42,10 @@ export class SnapTool extends maptalks.Class {
     setMode(mode) {
         if (this._checkMode(this._mode)) {
             this._mode = mode;
+            if (this.snaplayer) {
+                const geometries = this.snaplayer.getGeometries();
+                this.allGeometries = this._compositGeometries(geometries);
+            }
         } else {
             throw new Error('snap mode is invalid');
         }
@@ -88,6 +91,10 @@ export class SnapTool extends maptalks.Class {
      */
     enable() {
         const map = this.getMap();
+        if (this.snaplayer) {
+            const geometries = this.snaplayer.getGeometries();
+            this.allGeometries = this._compositGeometries(geometries);
+        }
         if (this.allGeometries) {
             if (!this._mousemove) {
                 this._registerEvents(map);
@@ -110,6 +117,7 @@ export class SnapTool extends maptalks.Class {
             this._mousemoveLayer.hide();
         }
         delete this._mousemove;
+        this.allGeometries = [];
     }
 
     /**
@@ -128,9 +136,12 @@ export class SnapTool extends maptalks.Class {
     setLayer(layer) {
         if (layer instanceof maptalks.VectorLayer) {
             const geometries = layer.getGeometries();
+            this.snaplayer = layer;
             this.allGeometries = this._compositGeometries(geometries);
-            layer.on('addgeo', function (e) {
-                this._addGeometries(e.geometries);
+            layer.on('addgeo', function () {
+                //this._addGeometries(e.geometries);
+                const geometries = layer.getGeometries();
+                this.allGeometries = this._compositGeometries(geometries);
             }, this);
             layer.on('clear', function () {
                 this._clearGeometries();
