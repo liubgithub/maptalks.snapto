@@ -44,8 +44,8 @@ IE 9-11, Chrome, Firefox, other modern and mobile browsers.
 new maptalks.SnapTool(options)
 ```
 * options **Object** options
-    * mode **String**   there are two modes, line and point, default is line. 
-    * tolerance **Number**    the distance in pixel from mouse to the snap point, default is 10.
+    * mode **String**   there are two modes, line and point, line by default. 
+    * tolerance **Number**    the distance in pixel from mouse to the snap point, 10 by default.
     * symbol **Object**    symbol of the mouse point.
 
 `setLayer(layer||maptalks.VectorLayer)` specify a vectorlayer which has geometries to snap to.
