@@ -39,13 +39,6 @@
             var layer = new maptalks.VectorLayer('layer').addTo(map);
             var drawTool = new maptalks.DrawTool({
                 symbol:{
-                    /*'markerType': 'ellipse',
-                    'markerFill': '#0ff',
-                    'markerLineColor': '#0f0',
-                    'markerLineWidth': 2,
-                    'markerLineOpacity': 1,
-                    'markerWidth': 10,
-                    'markerHeight': 10,*/
                     'lineColor': '#f00',
                     'polygonFill': '#0f0',
                     'polygonOpacity':0.6
@@ -59,6 +52,15 @@
             snap.addTo(map);
             snap.setLayer(layer);
             snap.bindDrawTool(drawTool);
+            var content = '<div class="map-panel"><header>操作说明</header><p>1、选择地图右侧的绘图工具选项，例如绘制一条线。</p><p>鼠标靠近线，会发现鼠标的光标点会被吸附到线的端点或线上某一点</p><p>mode选项用于snapto工具的吸附模式，有吸附点和线两种模式可供选择</p><p>start和End选项用于开启或关闭该工具吸附效果</p></dev>';
+            var infoPanel = new maptalks.control.Panel({
+                position : { 'bottom': '0', 'right': '0' },
+                draggable : true,
+                custom : false,
+                content : content,
+                closeButton : true
+            });
+            infoPanel.addTo(map);
             //snap.enable();
             drawTool.on('drawend', function (param) {
                 var geo = param.geometry;

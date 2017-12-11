@@ -1,5 +1,5 @@
 /*!
- * maptalks.snapto v0.1.5
+ * maptalks.snapto v0.1.6
  * LICENSE : MIT
  * (c) 2016-2017 maptalks.org
  */
@@ -2081,7 +2081,7 @@ var SnapTool = function (_maptalks$Class) {
 
     SnapTool.prototype.disable = function disable() {
         var map = this.getMap();
-        map.off('mousemove', this._mousemove);
+        map.off('mousemove touchstart', this._mousemove);
         if (this._mousemoveLayer) {
             this._mousemoveLayer.hide();
         }
@@ -2112,7 +2112,6 @@ var SnapTool = function (_maptalks$Class) {
             this.snaplayer = layer;
             this.allGeometries = this._compositGeometries(geometries);
             layer.on('addgeo', function () {
-                //this._addGeometries(e.geometries);
                 var geometries = layer.getGeometries();
                 this.allGeometries = this._compositGeometries(geometries);
             }, this);
@@ -2243,7 +2242,11 @@ var SnapTool = function (_maptalks$Class) {
     };
 
     SnapTool.prototype._parserToPoints = function _parserToPoints(geo) {
-        var coordinates = geo.getCoordinates();
+        var type = geo.getType();
+        var coordinates = null;
+        if (type === 'Circle' || type === 'Ellipse') {
+            coordinates = geo.getShell();
+        } else coordinates = geo.getCoordinates();
         var geos = [];
         //two cases,one is single geometry,and another is multi geometries
         if (coordinates[0] instanceof Array) {
@@ -2358,7 +2361,7 @@ var SnapTool = function (_maptalks$Class) {
                 this.snapPoint = null;
             }
         };
-        map.on('mousemove', this._mousemove, this);
+        map.on('mousemove touchstart', this._mousemove, this);
     };
 
     /**
@@ -2532,6 +2535,6 @@ exports.SnapTool = SnapTool;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-typeof console !== 'undefined' && console.log('maptalks.snapto v0.1.5, requires maptalks@^0.33.1.');
+typeof console !== 'undefined' && console.log('maptalks.snapto v0.1.6, requires maptalks@^0.33.1.');
 
 })));

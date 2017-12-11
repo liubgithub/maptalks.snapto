@@ -112,7 +112,7 @@ export class SnapTool extends maptalks.Class {
      */
     disable() {
         const map = this.getMap();
-        map.off('mousemove', this._mousemove);
+        map.off('mousemove touchstart', this._mousemove);
         if (this._mousemoveLayer) {
             this._mousemoveLayer.hide();
         }
@@ -263,7 +263,12 @@ export class SnapTool extends maptalks.Class {
     }
 
     _parserToPoints(geo) {
-        let coordinates = geo.getCoordinates();
+        const type = geo.getType();
+        let coordinates = null;
+        if (type === 'Circle' || type === 'Ellipse') {
+            coordinates = geo.getShell();
+        } else
+            coordinates = geo.getCoordinates();
         let geos = [];
         //two cases,one is single geometry,and another is multi geometries
         if (coordinates[0] instanceof Array) {
@@ -376,7 +381,7 @@ export class SnapTool extends maptalks.Class {
                 this.snapPoint = null;
             }
         };
-        map.on('mousemove', this._mousemove, this);
+        map.on('mousemove touchstart', this._mousemove, this);
     }
 
     /**
