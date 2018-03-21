@@ -1,5 +1,5 @@
 /*!
- * maptalks.snapto v0.1.7
+ * maptalks.snapto v0.1.8
  * LICENSE : MIT
  * (c) 2016-2018 maptalks.org
  */
@@ -2535,6 +2535,6 @@ exports.SnapTool = SnapTool;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-typeof console !== 'undefined' && console.log('maptalks.snapto v0.1.7, requires maptalks@^0.33.1.');
+typeof console !== 'undefined' && console.log('maptalks.snapto v0.1.8, requires maptalks@^0.33.1.');
 
 })));
