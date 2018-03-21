@@ -1,7 +1,7 @@
 /*!
- * maptalks.snapto v0.1.6
+ * maptalks.snapto v0.1.7
  * LICENSE : MIT
- * (c) 2016-2017 maptalks.org
+ * (c) 2016-2018 maptalks.org
  */
 /*!
  * requires maptalks@^0.33.1 
@@ -2112,10 +2112,10 @@ var SnapTool = function (_maptalks$Class) {
             this.snaplayer = layer;
             this.allGeometries = this._compositGeometries(geometries);
             layer.on('addgeo', function () {
-                var geometries = layer.getGeometries();
+                var geometries = this.layer.getGeometries();
                 this.allGeometries = this._compositGeometries(geometries);
             }, this);
-            layer.on('clear', function () {
+            this.layer.on('clear', function () {
                 this._clearGeometries();
             }, this);
             this._mousemoveLayer.bringToFront();
@@ -2535,6 +2535,6 @@ exports.SnapTool = SnapTool;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-typeof console !== 'undefined' && console.log('maptalks.snapto v0.1.6, requires maptalks@^0.33.1.');
+typeof console !== 'undefined' && console.log('maptalks.snapto v0.1.7, requires maptalks@^0.33.1.');
 
 })));
