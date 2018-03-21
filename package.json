@@ -1,6 +1,6 @@
 {
   "name": "maptalks.snapto",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "A snap tool used for mouse point to adsorb geometries on map",
   "license": "MIT",
   "repository": {

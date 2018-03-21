@@ -139,10 +139,10 @@ export class SnapTool extends maptalks.Class {
             this.snaplayer = layer;
             this.allGeometries = this._compositGeometries(geometries);
             layer.on('addgeo', function () {
-                const geometries = this.layer.getGeometries();
+                const geometries = this.snaplayer.getGeometries();
                 this.allGeometries = this._compositGeometries(geometries);
             }, this);
-            this.layer.on('clear', function () {
+            this.snaplayer.on('clear', function () {
                 this._clearGeometries();
             }, this);
             this._mousemoveLayer.bringToFront();
