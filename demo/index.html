@@ -36,7 +36,8 @@
         }
         window.onload = function () {
             initMap();
-            var layer = new maptalks.VectorLayer('layer').addTo(map);
+            //var layer = new maptalks.VectorLayer('layer').addTo(map);
+            var layer = randomPoints();
             var drawTool = new maptalks.DrawTool({
                 symbol:{
                     'lineColor': '#f00',
@@ -47,7 +48,7 @@
             }).addTo(map).disable();
             var snap = new maptalks.SnapTool({
                 tolerance: 10,
-                mode : 'line'
+                mode : 'point'
             });
             snap.addTo(map);
             snap.setLayer(layer);
@@ -62,6 +63,7 @@
             });
             infoPanel.addTo(map);
             //snap.enable();
+            //snap.disable();
             drawTool.on('drawend', function (param) {
                 var geo = param.geometry;
                 if (geo.getType() === 'Point') {
@@ -118,6 +120,36 @@
             });
             toolbar.addTo(map);
         };
+
+        //随机生成2000个点
+        function randomPoints() {
+            var randomPointLayer = new maptalks.VectorLayer('randomPoints').addTo(map);
+            var extent = map.getExtent();
+            const coordinates = [];
+            for(var i = 0;i < 60000;i++) {
+                var coordX = extent.xmin + (extent.xmax - extent.xmin)*Math.random();
+                var coordY = extent.ymin + (extent.ymax - extent.ymin)*Math.random();
+                var point = new maptalks.Marker([coordX,coordY],{
+                    symbol:{
+                        markerType:'ellipse',
+                        markerWidth:5,
+                        markerHeight:5,
+                        markerFill:'#FF83FA',
+                        markerLineColor:'#FFB6C1',
+                       'markerLineWidth': 1,
+                       'markerLineOpacity': 1
+                    }
+                }).addTo(randomPointLayer);
+                //coordinates.push([coordX,coordY]);
+            }
+            /*const line = new maptalks.LineString(coordinates,{
+                symbol:{
+                    lineWidth:1,
+                    lineColor:'#FFB6C1'
+                }
+            }).addTo(randomPointLayer);*/
+            return randomPointLayer;
+        }
 </script>
 </head>
 <body>
