@@ -21,14 +21,16 @@ As a plugin, ```maptalks.snapto``` must be loaded after ```maptalks.js``` in bro
 <script type="text/javascript" src="https://unpkg.com/maptalks/dist/maptalks.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/maptalks.snapto/dist/maptalks.snapto.min.js"></script>
 <script>
-   var snap = new maptalks.SnapTool({
+   const snap = new maptalks.SnapTool({
                 tolerance: 20,
                 mode : 'point'
             });
    snap.addTo(map);//when addto map, it will call enable method default.
+   //recommend set options 'geometryEvents' to false if vectorlayer contains a large amount of geometries
+   const layer = new maptalks.VectorLayer('vectorlayer',geometries,{ geometryEvents:false });
    snap.setLayer(layer);
    //If you draw geometries on map with a drawing tool, you should bind the maptalks.DrawTool object to the snapto tool.
-   var drawtool = new maptalks.DrawTool();
+   const drawtool = new maptalks.DrawTool();
    snap.bindDrawTool(drawtool);
 </script>
 ```
