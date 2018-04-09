@@ -1,5 +1,5 @@
 /*!
- * maptalks.snapto v0.1.9
+ * maptalks.snapto v0.1.10
  * LICENSE : MIT
  * (c) 2016-2018 maptalks.org
  */
@@ -12,86 +12,70 @@
 	(factory((global.maptalks = global.maptalks || {}),global.maptalks));
 }(this, (function (exports,maptalks) { 'use strict';
 
-var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+var index$3 = partialSort;
 
+// Floyd-Rivest selection algorithm:
+// Rearrange items so that all items in the [left, k] range are smaller than all items in (k, right];
+// The k-th element will have the (k - left + 1)th smallest value in [left, right]
 
+function partialSort(arr, k, left, right, compare) {
+    left = left || 0;
+    right = right || arr.length - 1;
+    compare = compare || defaultCompare;
 
-
-
-function createCommonjsModule(fn, module) {
-	return module = { exports: {} }, fn(module, module.exports), module.exports;
-}
-
-var quickselect$1 = createCommonjsModule(function (module, exports) {
-    (function (global, factory) {
-        module.exports = factory();
-    })(commonjsGlobal, function () {
-        'use strict';
-
-        function quickselect(arr, k, left, right, compare) {
-            quickselectStep(arr, k, left || 0, right || arr.length - 1, compare || defaultCompare);
+    while (right > left) {
+        if (right - left > 600) {
+            var n = right - left + 1;
+            var m = k - left + 1;
+            var z = Math.log(n);
+            var s = 0.5 * Math.exp(2 * z / 3);
+            var sd = 0.5 * Math.sqrt(z * s * (n - s) / n) * (m - n / 2 < 0 ? -1 : 1);
+            var newLeft = Math.max(left, Math.floor(k - m * s / n + sd));
+            var newRight = Math.min(right, Math.floor(k + (n - m) * s / n + sd));
+            partialSort(arr, k, newLeft, newRight, compare);
         }
 
-        function quickselectStep(arr, k, left, right, compare) {
+        var t = arr[k];
+        var i = left;
+        var j = right;
 
-            while (right > left) {
-                if (right - left > 600) {
-                    var n = right - left + 1;
-                    var m = k - left + 1;
-                    var z = Math.log(n);
-                    var s = 0.5 * Math.exp(2 * z / 3);
-                    var sd = 0.5 * Math.sqrt(z * s * (n - s) / n) * (m - n / 2 < 0 ? -1 : 1);
-                    var newLeft = Math.max(left, Math.floor(k - m * s / n + sd));
-                    var newRight = Math.min(right, Math.floor(k + (n - m) * s / n + sd));
-                    quickselectStep(arr, k, newLeft, newRight, compare);
-                }
+        swap(arr, left, k);
+        if (compare(arr[right], t) > 0) swap(arr, left, right);
 
-                var t = arr[k];
-                var i = left;
-                var j = right;
-
-                swap(arr, left, k);
-                if (compare(arr[right], t) > 0) swap(arr, left, right);
-
-                while (i < j) {
-                    swap(arr, i, j);
-                    i++;
-                    j--;
-                    while (compare(arr[i], t) < 0) {
-                        i++;
-                    }while (compare(arr[j], t) > 0) {
-                        j--;
-                    }
-                }
-
-                if (compare(arr[left], t) === 0) swap(arr, left, j);else {
-                    j++;
-                    swap(arr, j, right);
-                }
-
-                if (j <= k) left = j + 1;
-                if (k <= j) right = j - 1;
+        while (i < j) {
+            swap(arr, i, j);
+            i++;
+            j--;
+            while (compare(arr[i], t) < 0) {
+                i++;
+            }while (compare(arr[j], t) > 0) {
+                j--;
             }
         }
 
-        function swap(arr, i, j) {
-            var tmp = arr[i];
-            arr[i] = arr[j];
-            arr[j] = tmp;
+        if (compare(arr[left], t) === 0) swap(arr, left, j);else {
+            j++;
+            swap(arr, j, right);
         }
 
-        function defaultCompare(a, b) {
-            return a < b ? -1 : a > b ? 1 : 0;
-        }
+        if (j <= k) left = j + 1;
+        if (k <= j) right = j - 1;
+    }
+}
 
-        return quickselect;
-    });
-});
+function swap(arr, i, j) {
+    var tmp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = tmp;
+}
+
+function defaultCompare(a, b) {
+    return a < b ? -1 : a > b ? 1 : 0;
+}
 
 var index$1 = rbush$2;
-var default_1 = rbush$2;
 
-var quickselect = quickselect$1;
+var quickselect = index$3;
 
 function rbush$2(maxEntries, format) {
     if (!(this instanceof rbush$2)) return new rbush$2(maxEntries, format);
@@ -183,7 +167,7 @@ rbush$2.prototype = {
             return this;
         }
 
-        // recursively build the tree with the given data from scratch using OMT algorithm
+        // recursively build the tree with the given data from stratch using OMT algorithm
         var node = this._build(data.slice(), 0, data.length - 1, 0);
 
         if (!this.data.children.length) {
@@ -653,8 +637,6 @@ function multiSelect(arr, left, right, n, compare) {
         stack.push(left, mid, mid, right);
     }
 }
-
-index$1.default = default_1;
 
 /**
  * GeoJSON BBox
@@ -1631,7 +1613,7 @@ function lineReduce(geojson, callback, initialValue) {
     return previousValue;
 }
 
-var index$3 = Object.freeze({
+var index$5 = Object.freeze({
 	coordEach: coordEach$1,
 	coordReduce: coordReduce,
 	propEach: propEach,
@@ -1651,7 +1633,7 @@ var index$3 = Object.freeze({
 	lineReduce: lineReduce
 });
 
-var require$$1 = ( index$3 && undefined ) || index$3;
+var require$$1 = ( index$5 && undefined ) || index$5;
 
 var rbush = index$1;
 var meta = require$$1;
@@ -2382,10 +2364,10 @@ var SnapTool = function (_maptalks$Class) {
                 }
             }
         };
-        this._mousedown = function (e) {
+        this._mousedown = function () {
             this._needFindGeometry = false;
         };
-        this._mouseup = function (e) {
+        this._mouseup = function () {
             this._needFindGeometry = true;
         };
         map.on('mousemove touchstart', this._mousemove, this);
@@ -2564,6 +2546,6 @@ exports.SnapTool = SnapTool;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-typeof console !== 'undefined' && console.log('maptalks.snapto v0.1.9, requires maptalks@^0.33.1.');
+typeof console !== 'undefined' && console.log('maptalks.snapto v0.1.10, requires maptalks@^0.33.1.');
 
 })));

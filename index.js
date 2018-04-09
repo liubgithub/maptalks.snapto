@@ -113,8 +113,8 @@ export class SnapTool extends maptalks.Class {
     disable() {
         const map = this.getMap();
         map.off('mousemove touchstart', this._mousemove);
-        map.off('mousedown',this._mousedown,this);
-        map.off('mouseup',this._mouseup,this);
+        map.off('mousedown', this._mousedown, this);
+        map.off('mouseup', this._mouseup, this);
         if (this._mousemoveLayer) {
             this._mousemoveLayer.hide();
         }
@@ -375,7 +375,7 @@ export class SnapTool extends maptalks.Class {
                 this._marker.setCoordinates(e.coordinate);
             }
             //indicate find geometry
-            if(!this._needFindGeometry) return;
+            if (!this._needFindGeometry) return;
             const availGeometries = this._findGeometry(e.coordinate);
             if (availGeometries.features.length > 0) {
                 this.snapPoint = this._getSnapPoint(availGeometries);
@@ -384,15 +384,15 @@ export class SnapTool extends maptalks.Class {
                 }
             }
         };
-        this._mousedown = function(e){
+        this._mousedown = function () {
             this._needFindGeometry = false;
-        }
-        this._mouseup = function(e){
-           this._needFindGeometry = true;
-        }
+        };
+        this._mouseup = function () {
+            this._needFindGeometry = true;
+        };
         map.on('mousemove touchstart', this._mousemove, this);
-        map.on('mousedown',this._mousedown,this);
-        map.on('mouseup',this._mouseup,this);
+        map.on('mousedown', this._mousedown, this);
+        map.on('mouseup', this._mouseup, this);
     }
 
     /**
