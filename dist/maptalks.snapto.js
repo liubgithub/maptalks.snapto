@@ -2362,6 +2362,8 @@ var SnapTool = function (_maptalks$Class) {
                 if (this.snapPoint) {
                     this._marker.setCoordinates([this.snapPoint.x, this.snapPoint.y]);
                 }
+            } else {
+                this.snapPoint = null;
             }
         };
         this._mousedown = function () {

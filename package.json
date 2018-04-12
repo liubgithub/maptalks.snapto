@@ -1,6 +1,6 @@
 {
   "name": "maptalks.snapto",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "A snap tool used for mouse point to adsorb geometries on map",
   "license": "MIT",
   "repository": {
@@ -35,7 +35,7 @@
     "karma-ie-launcher": "^1.0.0",
     "karma-mocha": "^1.3.0",
     "karma-mocha-reporter": "^2.2.5",
-    "maptalks": "^0.33.1",
+    "maptalks": "^0.39.5",
     "maptalks-build-helpers": "^0.3.0",
     "minimist": "^1.2.0",
     "mocha": "^2.4.5"

@@ -126,7 +126,7 @@
             var randomPointLayer = new maptalks.VectorLayer('randomPoints',null,{ geometryEvents:false }).addTo(map);
             var extent = map.getExtent();
             const coordinates = [];
-            for(var i = 0;i < 60000;i++) {
+            for(var i = 0;i < 1;i++) {
                 var coordX = extent.xmin + (extent.xmax - extent.xmin)*Math.random();
                 var coordY = extent.ymin + (extent.ymax - extent.ymin)*Math.random();
                 var point = new maptalks.Marker([coordX,coordY],{
@@ -140,14 +140,7 @@
                        'markerLineOpacity': 1
                     }
                 }).addTo(randomPointLayer);
-                //coordinates.push([coordX,coordY]);
             }
-            /*const line = new maptalks.LineString(coordinates,{
-                symbol:{
-                    lineWidth:1,
-                    lineColor:'#FFB6C1'
-                }
-            }).addTo(randomPointLayer);*/
             return randomPointLayer;
         }
 </script>
