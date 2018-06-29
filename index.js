@@ -183,7 +183,10 @@ export class SnapTool extends maptalks.Class {
                         e.target._geometry.setWidth(rx * 2);
                         e.target._geometry.setHeight(ry * 2);
                     } else if (mode === 'rectangle' || mode === 'freeHandRectangle') {
-                        const containerPoint = map.coordToContainerPoint(this.snapPoint);
+                        const containerPoint = map.coordToContainerPoint(new maptalks.Coordinate({
+                            x: this.snapPoint.x,
+                            y: this.snapPoint.y
+                        }));
                         const firstClick = map.coordToContainerPoint(e.target._geometry.getFirstCoordinate());
                         const ring = [
                             [firstClick.x, firstClick.y],
@@ -224,7 +227,10 @@ export class SnapTool extends maptalks.Class {
                         geometry.setWidth(rx * 2);
                         geometry.setHeight(ry * 2);
                     } else if (mode === 'rectangle' || mode === 'freeHandRectangle') {
-                        const containerPoint = map.coordToContainerPoint(this.snapPoint);
+                        const containerPoint = map.coordToContainerPoint(new maptalks.Coordinate({
+                            x: this.snapPoint.x,
+                            y: this.snapPoint.y
+                        }));
                         const firstClick = map.coordToContainerPoint(geometry.getFirstCoordinate());
                         const ring = [
                             [firstClick.x, firstClick.y],

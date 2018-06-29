@@ -2178,7 +2178,10 @@ var SnapTool = function (_maptalks$Class) {
                         e.target._geometry.setWidth(rx * 2);
                         e.target._geometry.setHeight(ry * 2);
                     } else if (mode === 'rectangle' || mode === 'freeHandRectangle') {
-                        var containerPoint = map.coordToContainerPoint(_this2.snapPoint);
+                        var containerPoint = map.coordToContainerPoint(new maptalks.Coordinate({
+                            x: _this2.snapPoint.x,
+                            y: _this2.snapPoint.y
+                        }));
                         var firstClick = map.coordToContainerPoint(e.target._geometry.getFirstCoordinate());
                         var ring = [[firstClick.x, firstClick.y], [containerPoint.x, firstClick.y], [containerPoint.x, containerPoint.y], [firstClick.x, containerPoint.y]];
                         e.target._geometry.setCoordinates(ring.map(function (c) {
@@ -2216,7 +2219,10 @@ var SnapTool = function (_maptalks$Class) {
                         geometry.setWidth(rx * 2);
                         geometry.setHeight(ry * 2);
                     } else if (mode === 'rectangle' || mode === 'freeHandRectangle') {
-                        var containerPoint = map.coordToContainerPoint(_this2.snapPoint);
+                        var containerPoint = map.coordToContainerPoint(new maptalks.Coordinate({
+                            x: _this2.snapPoint.x,
+                            y: _this2.snapPoint.y
+                        }));
                         var firstClick = map.coordToContainerPoint(geometry.getFirstCoordinate());
                         var ring = [[firstClick.x, firstClick.y], [containerPoint.x, firstClick.y], [containerPoint.x, containerPoint.y], [firstClick.x, containerPoint.y]];
                         geometry.setCoordinates(ring.map(function (c) {
