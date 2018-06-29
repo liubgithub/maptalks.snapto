@@ -1,5 +1,5 @@
 /*!
- * maptalks.snapto v0.1.10
+ * maptalks.snapto v0.1.11
  * LICENSE : MIT
  * (c) 2016-2018 maptalks.org
  */
@@ -12,70 +12,86 @@
 	(factory((global.maptalks = global.maptalks || {}),global.maptalks));
 }(this, (function (exports,maptalks) { 'use strict';
 
-var index$3 = partialSort;
+var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
-// Floyd-Rivest selection algorithm:
-// Rearrange items so that all items in the [left, k] range are smaller than all items in (k, right];
-// The k-th element will have the (k - left + 1)th smallest value in [left, right]
 
-function partialSort(arr, k, left, right, compare) {
-    left = left || 0;
-    right = right || arr.length - 1;
-    compare = compare || defaultCompare;
 
-    while (right > left) {
-        if (right - left > 600) {
-            var n = right - left + 1;
-            var m = k - left + 1;
-            var z = Math.log(n);
-            var s = 0.5 * Math.exp(2 * z / 3);
-            var sd = 0.5 * Math.sqrt(z * s * (n - s) / n) * (m - n / 2 < 0 ? -1 : 1);
-            var newLeft = Math.max(left, Math.floor(k - m * s / n + sd));
-            var newRight = Math.min(right, Math.floor(k + (n - m) * s / n + sd));
-            partialSort(arr, k, newLeft, newRight, compare);
+
+
+function createCommonjsModule(fn, module) {
+	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
+
+var quickselect$1 = createCommonjsModule(function (module, exports) {
+    (function (global, factory) {
+        module.exports = factory();
+    })(commonjsGlobal, function () {
+        'use strict';
+
+        function quickselect(arr, k, left, right, compare) {
+            quickselectStep(arr, k, left || 0, right || arr.length - 1, compare || defaultCompare);
         }
 
-        var t = arr[k];
-        var i = left;
-        var j = right;
+        function quickselectStep(arr, k, left, right, compare) {
 
-        swap(arr, left, k);
-        if (compare(arr[right], t) > 0) swap(arr, left, right);
+            while (right > left) {
+                if (right - left > 600) {
+                    var n = right - left + 1;
+                    var m = k - left + 1;
+                    var z = Math.log(n);
+                    var s = 0.5 * Math.exp(2 * z / 3);
+                    var sd = 0.5 * Math.sqrt(z * s * (n - s) / n) * (m - n / 2 < 0 ? -1 : 1);
+                    var newLeft = Math.max(left, Math.floor(k - m * s / n + sd));
+                    var newRight = Math.min(right, Math.floor(k + (n - m) * s / n + sd));
+                    quickselectStep(arr, k, newLeft, newRight, compare);
+                }
 
-        while (i < j) {
-            swap(arr, i, j);
-            i++;
-            j--;
-            while (compare(arr[i], t) < 0) {
-                i++;
-            }while (compare(arr[j], t) > 0) {
-                j--;
+                var t = arr[k];
+                var i = left;
+                var j = right;
+
+                swap(arr, left, k);
+                if (compare(arr[right], t) > 0) swap(arr, left, right);
+
+                while (i < j) {
+                    swap(arr, i, j);
+                    i++;
+                    j--;
+                    while (compare(arr[i], t) < 0) {
+                        i++;
+                    }while (compare(arr[j], t) > 0) {
+                        j--;
+                    }
+                }
+
+                if (compare(arr[left], t) === 0) swap(arr, left, j);else {
+                    j++;
+                    swap(arr, j, right);
+                }
+
+                if (j <= k) left = j + 1;
+                if (k <= j) right = j - 1;
             }
         }
 
-        if (compare(arr[left], t) === 0) swap(arr, left, j);else {
-            j++;
-            swap(arr, j, right);
+        function swap(arr, i, j) {
+            var tmp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = tmp;
         }
 
-        if (j <= k) left = j + 1;
-        if (k <= j) right = j - 1;
-    }
-}
+        function defaultCompare(a, b) {
+            return a < b ? -1 : a > b ? 1 : 0;
+        }
 
-function swap(arr, i, j) {
-    var tmp = arr[i];
-    arr[i] = arr[j];
-    arr[j] = tmp;
-}
-
-function defaultCompare(a, b) {
-    return a < b ? -1 : a > b ? 1 : 0;
-}
+        return quickselect;
+    });
+});
 
 var index$1 = rbush$2;
+var default_1 = rbush$2;
 
-var quickselect = index$3;
+var quickselect = quickselect$1;
 
 function rbush$2(maxEntries, format) {
     if (!(this instanceof rbush$2)) return new rbush$2(maxEntries, format);
@@ -167,7 +183,7 @@ rbush$2.prototype = {
             return this;
         }
 
-        // recursively build the tree with the given data from stratch using OMT algorithm
+        // recursively build the tree with the given data from scratch using OMT algorithm
         var node = this._build(data.slice(), 0, data.length - 1, 0);
 
         if (!this.data.children.length) {
@@ -637,6 +653,8 @@ function multiSelect(arr, left, right, n, compare) {
         stack.push(left, mid, mid, right);
     }
 }
+
+index$1.default = default_1;
 
 /**
  * GeoJSON BBox
@@ -1613,7 +1631,7 @@ function lineReduce(geojson, callback, initialValue) {
     return previousValue;
 }
 
-var index$5 = Object.freeze({
+var index$3 = Object.freeze({
 	coordEach: coordEach$1,
 	coordReduce: coordReduce,
 	propEach: propEach,
@@ -1633,7 +1651,7 @@ var index$5 = Object.freeze({
 	lineReduce: lineReduce
 });
 
-var require$$1 = ( index$5 && undefined ) || index$5;
+var require$$1 = ( index$3 && undefined ) || index$3;
 
 var rbush = index$1;
 var meta = require$$1;
@@ -2142,7 +2160,33 @@ var SnapTool = function (_maptalks$Class) {
             }, this);
             drawTool.on('mousemove', function (e) {
                 if (_this2.snapPoint) {
-                    _this2._resetCoordinates(e.target._geometry, _this2.snapPoint);
+                    var mode = e.target.getMode();
+                    var map = e.target.getMap();
+                    if (mode === 'circle' || mode === 'freeHandCircle') {
+                        var radius = map.computeLength(e.target._geometry.getCenter(), _this2.snapPoint);
+                        e.target._geometry.setRadius(radius);
+                    } else if (mode === 'ellipse' || mode === 'freeHandEllipse') {
+                        var center = e.target._geometry.getCenter();
+                        var rx = map.computeLength(center, new maptalks.Coordinate({
+                            x: _this2.snapPoint.x,
+                            y: center.y
+                        }));
+                        var ry = map.computeLength(center, new maptalks.Coordinate({
+                            x: center.x,
+                            y: _this2.snapPoint.y
+                        }));
+                        e.target._geometry.setWidth(rx * 2);
+                        e.target._geometry.setHeight(ry * 2);
+                    } else if (mode === 'rectangle' || mode === 'freeHandRectangle') {
+                        var containerPoint = map.coordToContainerPoint(_this2.snapPoint);
+                        var firstClick = map.coordToContainerPoint(e.target._geometry.getFirstCoordinate());
+                        var ring = [[firstClick.x, firstClick.y], [containerPoint.x, firstClick.y], [containerPoint.x, containerPoint.y], [firstClick.x, containerPoint.y]];
+                        e.target._geometry.setCoordinates(ring.map(function (c) {
+                            return map.containerPointToCoord(new maptalks.Point(c));
+                        }));
+                    } else {
+                        _this2._resetCoordinates(e.target._geometry, _this2.snapPoint);
+                    }
                 }
             }, this);
             drawTool.on('drawvertex', function (e) {
@@ -2153,18 +2197,51 @@ var SnapTool = function (_maptalks$Class) {
             }, this);
             drawTool.on('drawend', function (e) {
                 if (_this2.snapPoint) {
+                    var mode = e.target.getMode();
+                    var map = e.target.getMap();
                     var geometry = e.geometry;
-                    _this2._resetCoordinates(geometry, _this2.snapPoint);
+                    if (mode === 'circle' || mode === 'freeHandCircle') {
+                        var radius = map.computeLength(e.target._geometry.getCenter(), _this2.snapPoint);
+                        geometry.setRadius(radius);
+                    } else if (mode === 'ellipse' || mode === 'freeHandEllipse') {
+                        var center = geometry.getCenter();
+                        var rx = map.computeLength(center, new maptalks.Coordinate({
+                            x: _this2.snapPoint.x,
+                            y: center.y
+                        }));
+                        var ry = map.computeLength(center, new maptalks.Coordinate({
+                            x: center.x,
+                            y: _this2.snapPoint.y
+                        }));
+                        geometry.setWidth(rx * 2);
+                        geometry.setHeight(ry * 2);
+                    } else if (mode === 'rectangle' || mode === 'freeHandRectangle') {
+                        var containerPoint = map.coordToContainerPoint(_this2.snapPoint);
+                        var firstClick = map.coordToContainerPoint(geometry.getFirstCoordinate());
+                        var ring = [[firstClick.x, firstClick.y], [containerPoint.x, firstClick.y], [containerPoint.x, containerPoint.y], [firstClick.x, containerPoint.y]];
+                        geometry.setCoordinates(ring.map(function (c) {
+                            return map.containerPointToCoord(new maptalks.Point(c));
+                        }));
+                    } else {
+                        _this2._resetCoordinates(geometry, _this2.snapPoint);
+                    }
                 }
             }, this);
         }
     };
 
     SnapTool.prototype._resetCoordinates = function _resetCoordinates(geometry, snapPoint) {
+        if (!geometry) return geometry;
         var coords = geometry.getCoordinates();
         if (geometry instanceof maptalks.Polygon) {
+            if (geometry instanceof maptalks.Circle) {
+                return geometry;
+            }
             var coordinates = coords[0];
-            coordinates.splice(coordinates.length - 2, 1);
+            if (coordinates instanceof Array && coordinates.length > 2) {
+                coordinates[coordinates.length - 2].x = snapPoint.x;
+                coordinates[coordinates.length - 2].y = snapPoint.y;
+            }
         } else if (coords instanceof Array) {
             coords[coords.length - 1].x = snapPoint.x;
             coords[coords.length - 1].y = snapPoint.y;
@@ -2177,6 +2254,7 @@ var SnapTool = function (_maptalks$Class) {
     };
 
     SnapTool.prototype._resetClickPoint = function _resetClickPoint(clickCoords, snapPoint) {
+        if (!clickCoords) return;
         clickCoords[clickCoords.length - 1].x = snapPoint.x;
         clickCoords[clickCoords.length - 1].y = snapPoint.y;
     };
@@ -2548,6 +2626,6 @@ exports.SnapTool = SnapTool;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-typeof console !== 'undefined' && console.log('maptalks.snapto v0.1.10, requires maptalks@^0.33.1.');
+typeof console !== 'undefined' && console.log('maptalks.snapto v0.1.11, requires maptalks@^0.33.1.');
 
 })));

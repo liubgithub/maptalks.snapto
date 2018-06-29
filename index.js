@@ -165,7 +165,36 @@ export class SnapTool extends maptalks.Class {
             }, this);
             drawTool.on('mousemove', (e) => {
                 if (this.snapPoint) {
-                    this._resetCoordinates(e.target._geometry, this.snapPoint);
+                    const mode = e.target.getMode();
+                    const map = e.target.getMap();
+                    if (mode === 'circle' || mode === 'freeHandCircle') {
+                        const radius = map.computeLength(e.target._geometry.getCenter(), this.snapPoint);
+                        e.target._geometry.setRadius(radius);
+                    } else if (mode === 'ellipse' || mode === 'freeHandEllipse') {
+                        const center = e.target._geometry.getCenter();
+                        const rx = map.computeLength(center, new maptalks.Coordinate({
+                            x: this.snapPoint.x,
+                            y: center.y
+                        }));
+                        const ry = map.computeLength(center, new maptalks.Coordinate({
+                            x: center.x,
+                            y: this.snapPoint.y
+                        }));
+                        e.target._geometry.setWidth(rx * 2);
+                        e.target._geometry.setHeight(ry * 2);
+                    } else if (mode === 'rectangle' || mode === 'freeHandRectangle') {
+                        const containerPoint = map.coordToContainerPoint(this.snapPoint);
+                        const firstClick = map.coordToContainerPoint(e.target._geometry.getFirstCoordinate());
+                        const ring = [
+                            [firstClick.x, firstClick.y],
+                            [containerPoint.x, firstClick.y],
+                            [containerPoint.x, containerPoint.y],
+                            [firstClick.x, containerPoint.y]
+                        ];
+                        e.target._geometry.setCoordinates(ring.map(c => map.containerPointToCoord(new maptalks.Point(c))));
+                    } else {
+                        this._resetCoordinates(e.target._geometry, this.snapPoint);
+                    }
                 }
             }, this);
             drawTool.on('drawvertex', (e) => {
@@ -176,18 +205,54 @@ export class SnapTool extends maptalks.Class {
             }, this);
             drawTool.on('drawend', (e) => {
                 if (this.snapPoint) {
+                    const mode = e.target.getMode();
+                    const map = e.target.getMap();
                     const geometry = e.geometry;
-                    this._resetCoordinates(geometry, this.snapPoint);
+                    if (mode === 'circle' || mode === 'freeHandCircle') {
+                        const radius = map.computeLength(e.target._geometry.getCenter(), this.snapPoint);
+                        geometry.setRadius(radius);
+                    } else if (mode === 'ellipse' || mode === 'freeHandEllipse') {
+                        const center = geometry.getCenter();
+                        const rx = map.computeLength(center, new maptalks.Coordinate({
+                            x: this.snapPoint.x,
+                            y: center.y
+                        }));
+                        const ry = map.computeLength(center, new maptalks.Coordinate({
+                            x: center.x,
+                            y: this.snapPoint.y
+                        }));
+                        geometry.setWidth(rx * 2);
+                        geometry.setHeight(ry * 2);
+                    } else if (mode === 'rectangle' || mode === 'freeHandRectangle') {
+                        const containerPoint = map.coordToContainerPoint(this.snapPoint);
+                        const firstClick = map.coordToContainerPoint(geometry.getFirstCoordinate());
+                        const ring = [
+                            [firstClick.x, firstClick.y],
+                            [containerPoint.x, firstClick.y],
+                            [containerPoint.x, containerPoint.y],
+                            [firstClick.x, containerPoint.y]
+                        ];
+                        geometry.setCoordinates(ring.map(c => map.containerPointToCoord(new maptalks.Point(c))));
+                    } else {
+                        this._resetCoordinates(geometry, this.snapPoint);
+                    }
                 }
             }, this);
         }
     }
 
     _resetCoordinates(geometry, snapPoint) {
+        if (!geometry) return geometry;
         const coords = geometry.getCoordinates();
         if (geometry instanceof maptalks.Polygon) {
-            const coordinates = coords[0];
-            coordinates.splice(coordinates.length - 2, 1);
+            if (geometry instanceof maptalks.Circle) {
+                return geometry;
+            }
+            var coordinates = coords[0];
+            if (coordinates instanceof Array && coordinates.length > 2) {
+                coordinates[coordinates.length - 2].x = snapPoint.x;
+                coordinates[coordinates.length - 2].y = snapPoint.y;
+            }
         } else if (coords instanceof Array) {
             coords[coords.length - 1].x = snapPoint.x;
             coords[coords.length - 1].y = snapPoint.y;
@@ -200,6 +265,7 @@ export class SnapTool extends maptalks.Class {
     }
 
     _resetClickPoint(clickCoords, snapPoint) {
+        if (!clickCoords) return;
         clickCoords[clickCoords.length - 1].x = snapPoint.x;
         clickCoords[clickCoords.length - 1].y = snapPoint.y;
     }
