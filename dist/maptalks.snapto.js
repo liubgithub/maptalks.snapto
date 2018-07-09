@@ -2318,11 +2318,21 @@ var SnapTool = function (_maptalks$Class) {
     SnapTool.prototype._createMarkers = function _createMarkers(coords) {
         var markers = [];
         coords.forEach(function (coord) {
-            var _geo = new maptalks.Marker(coord, {
-                properties: {}
-            });
-            _geo = _geo.toGeoJSON();
-            markers.push(_geo);
+            if (coord instanceof Array) {
+                coord.forEach(function (_coord) {
+                    var _geo = new maptalks.Marker(_coord, {
+                        properties: {}
+                    });
+                    _geo = _geo.toGeoJSON();
+                    markers.push(_geo);
+                });
+            } else {
+                var _geo = new maptalks.Marker(coord, {
+                    properties: {}
+                });
+                _geo = _geo.toGeoJSON();
+                markers.push(_geo);
+            }
         });
         return markers;
     };
