@@ -327,11 +327,21 @@ export class SnapTool extends maptalks.Class {
     _createMarkers(coords) {
         const markers = [];
         coords.forEach(function (coord) {
-            let _geo = new maptalks.Marker(coord, {
-                properties:{}
-            });
-            _geo = _geo.toGeoJSON();
-            markers.push(_geo);
+            if(coord instanceof Array){
+                coord.forEach(function (_coord) {
+                    let _geo = new maptalks.Marker(_coord, {
+                        properties: {}
+                    });
+                    _geo = _geo.toGeoJSON();
+                    markers.push(_geo);
+                });
+            }else{
+                let _geo = new maptalks.Marker(coord, {
+                    properties:{}
+                });
+                _geo = _geo.toGeoJSON();
+                markers.push(_geo);
+            }
         });
         return markers;
     }
