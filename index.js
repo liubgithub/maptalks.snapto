@@ -43,8 +43,17 @@ export class SnapTool extends maptalks.Class {
         if (this._checkMode(this._mode)) {
             this._mode = mode;
             if (this.snaplayer) {
-                const geometries = this.snaplayer.getGeometries();
-                this.allGeometries = this._compositGeometries(geometries);
+                if (this.snaplayer instanceof Array){
+                    this.allLayersGeometries = [];
+                    this.snaplayer.forEach(function (tempLayer, index) {
+                        const tempGeometries = tempLayer.getGeometries();
+                        this.allLayersGeometries[index] = this._compositGeometries(tempGeometries);
+                    }.bind(this));
+                    this.allGeometries = [].concat(...this.allLayersGeometries);
+                } else {
+                    const geometries = this.snaplayer.getGeometries();
+                    this.allGeometries = this._compositGeometries(geometries);
+                }
             }
         } else {
             throw new Error('snap mode is invalid');
@@ -92,8 +101,18 @@ export class SnapTool extends maptalks.Class {
     enable() {
         const map = this.getMap();
         if (this.snaplayer) {
-            const geometries = this.snaplayer.getGeometries();
-            this.allGeometries = this._compositGeometries(geometries);
+            if (this.snaplayer instanceof Array){
+                this.allLayersGeometries = [];
+                this.snaplayer.forEach(function (tempLayer, index) {
+                    const tempGeometries = tempLayer.getGeometries();
+                    this.allLayersGeometries[index] = this._compositGeometries(tempGeometries);
+                }.bind(this));
+                this.allGeometries = [].concat(...this.allLayersGeometries);
+            } else {
+                const geometries = this.snaplayer.getGeometries();
+                this.allGeometries = this._compositGeometries(geometries);
+            }
+            
         }
         if (this.allGeometries) {
             if (!this._mousemove) {
@@ -132,11 +151,32 @@ export class SnapTool extends maptalks.Class {
     }
 
     /**
-     * @param {Layer||maptalk.VectorLayer} layer to snap to
+     * @param {Layer||maptalk.VectorLayer||Array.<Layer>||Array.<maptalk.VectorLayer>} layer to snap to
      * Set layer for snapping to
      */
     setLayer(layer) {
-        if (layer instanceof maptalks.VectorLayer) {
+        if (layer instanceof Array){
+            this.snaplayer = [];
+            this.allLayersGeometries = [];
+            layer.forEach(function (tempLayer, index) {
+                if (tempLayer instanceof maptalks.VectorLayer) {
+                    this.snaplayer.push(tempLayer);
+                    const tempGeometries = tempLayer.getGeometries();
+                    this.allLayersGeometries[index] = this._compositGeometries(tempGeometries);
+                    tempLayer.on('addgeo', function () {
+                        const tempGeometries = this.snaplayer[index].getGeometries();
+                        this.allLayersGeometries[index] = this._compositGeometries(tempGeometries);
+                        this.allGeometries = [].concat(...this.allLayersGeometries);
+                    }, this);
+                    tempLayer.on('clear', function () {
+                        this.allLayersGeometries.splice(index, 1);
+                        this.allGeometries = [].concat(...this.allLayersGeometries);
+                    }, this);
+                }
+            }.bind(this));
+            this.allGeometries = [].concat(...this.allLayersGeometries);
+            this._mousemoveLayer.bringToFront();
+        } else if (layer instanceof maptalks.VectorLayer) {
             const geometries = layer.getGeometries();
             this.snaplayer = layer;
             this.allGeometries = this._compositGeometries(geometries);
