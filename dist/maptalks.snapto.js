@@ -2021,8 +2021,19 @@ var SnapTool = function (_maptalks$Class) {
         if (this._checkMode(this._mode)) {
             this._mode = mode;
             if (this.snaplayer) {
-                var geometries = this.snaplayer.getGeometries();
-                this.allGeometries = this._compositGeometries(geometries);
+                if (this.snaplayer instanceof Array) {
+                    var _ref;
+
+                    this.allLayersGeometries = [];
+                    this.snaplayer.forEach(function (tempLayer, index$$1) {
+                        var tempGeometries = tempLayer.getGeometries();
+                        this.allLayersGeometries[index$$1] = this._compositGeometries(tempGeometries);
+                    }.bind(this));
+                    this.allGeometries = (_ref = []).concat.apply(_ref, this.allLayersGeometries);
+                } else {
+                    var geometries = this.snaplayer.getGeometries();
+                    this.allGeometries = this._compositGeometries(geometries);
+                }
             }
         } else {
             throw new Error('snap mode is invalid');
@@ -2077,8 +2088,19 @@ var SnapTool = function (_maptalks$Class) {
     SnapTool.prototype.enable = function enable() {
         var map = this.getMap();
         if (this.snaplayer) {
-            var geometries = this.snaplayer.getGeometries();
-            this.allGeometries = this._compositGeometries(geometries);
+            if (this.snaplayer instanceof Array) {
+                var _ref2;
+
+                this.allLayersGeometries = [];
+                this.snaplayer.forEach(function (tempLayer, index$$1) {
+                    var tempGeometries = tempLayer.getGeometries();
+                    this.allLayersGeometries[index$$1] = this._compositGeometries(tempGeometries);
+                }.bind(this));
+                this.allGeometries = (_ref2 = []).concat.apply(_ref2, this.allLayersGeometries);
+            } else {
+                var geometries = this.snaplayer.getGeometries();
+                this.allGeometries = this._compositGeometries(geometries);
+            }
         }
         if (this.allGeometries) {
             if (!this._mousemove) {
@@ -2121,13 +2143,40 @@ var SnapTool = function (_maptalks$Class) {
     };
 
     /**
-     * @param {Layer||maptalk.VectorLayer} layer to snap to
+     * @param {Layer||maptalk.VectorLayer||Array.<Layer>||Array.<maptalk.VectorLayer>} layer to snap to
      * Set layer for snapping to
      */
 
 
     SnapTool.prototype.setLayer = function setLayer(layer) {
-        if (layer instanceof maptalks.VectorLayer) {
+        if (layer instanceof Array) {
+            var _ref5;
+
+            this.snaplayer = [];
+            this.allLayersGeometries = [];
+            layer.forEach(function (tempLayer, index$$1) {
+                if (tempLayer instanceof maptalks.VectorLayer) {
+                    this.snaplayer.push(tempLayer);
+                    var tempGeometries = tempLayer.getGeometries();
+                    this.allLayersGeometries[index$$1] = this._compositGeometries(tempGeometries);
+                    tempLayer.on('addgeo', function () {
+                        var _ref3;
+
+                        var tempGeometries = this.snaplayer[index$$1].getGeometries();
+                        this.allLayersGeometries[index$$1] = this._compositGeometries(tempGeometries);
+                        this.allGeometries = (_ref3 = []).concat.apply(_ref3, this.allLayersGeometries);
+                    }, this);
+                    tempLayer.on('clear', function () {
+                        var _ref4;
+
+                        this.allLayersGeometries.splice(index$$1, 1);
+                        this.allGeometries = (_ref4 = []).concat.apply(_ref4, this.allLayersGeometries);
+                    }, this);
+                }
+            }.bind(this));
+            this.allGeometries = (_ref5 = []).concat.apply(_ref5, this.allLayersGeometries);
+            this._mousemoveLayer.bringToFront();
+        } else if (layer instanceof maptalks.VectorLayer) {
             var geometries = layer.getGeometries();
             this.snaplayer = layer;
             this.allGeometries = this._compositGeometries(geometries);
