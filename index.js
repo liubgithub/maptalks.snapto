@@ -43,7 +43,7 @@ export class SnapTool extends maptalks.Class {
         if (this._checkMode(this._mode)) {
             this._mode = mode;
             if (this.snaplayer) {
-                if (this.snaplayer instanceof Array){
+                if (this.snaplayer instanceof Array) {
                     this.allLayersGeometries = [];
                     this.snaplayer.forEach(function (tempLayer, index) {
                         const tempGeometries = tempLayer.getGeometries();
@@ -101,7 +101,7 @@ export class SnapTool extends maptalks.Class {
     enable() {
         const map = this.getMap();
         if (this.snaplayer) {
-            if (this.snaplayer instanceof Array){
+            if (this.snaplayer instanceof Array) {
                 this.allLayersGeometries = [];
                 this.snaplayer.forEach(function (tempLayer, index) {
                     const tempGeometries = tempLayer.getGeometries();
@@ -112,7 +112,7 @@ export class SnapTool extends maptalks.Class {
                 const geometries = this.snaplayer.getGeometries();
                 this.allGeometries = this._compositGeometries(geometries);
             }
-            
+
         }
         if (this.allGeometries) {
             if (!this._mousemove) {
@@ -155,7 +155,7 @@ export class SnapTool extends maptalks.Class {
      * Set layer for snapping to
      */
     setLayer(layer) {
-        if (layer instanceof Array){
+        if (layer instanceof Array) {
             this.snaplayer = [];
             this.allLayersGeometries = [];
             layer.forEach(function (tempLayer, index) {
@@ -312,8 +312,10 @@ export class SnapTool extends maptalks.Class {
 
     _resetClickPoint(clickCoords, snapPoint) {
         if (!clickCoords) return;
-        clickCoords[clickCoords.length - 1].x = snapPoint.x;
-        clickCoords[clickCoords.length - 1].y = snapPoint.y;
+        const map = this.getMap();
+        const clickPoint = map._pointToPrj(map.coordinateToPoint(snapPoint));
+        clickCoords[clickCoords.length - 1].x = clickPoint.x;
+        clickCoords[clickCoords.length - 1].y = clickPoint.y;
     }
 
     _addGeometries(geometries) {
@@ -367,7 +369,7 @@ export class SnapTool extends maptalks.Class {
     _createMarkers(coords) {
         const markers = [];
         coords.forEach(function (coord) {
-            if(coord instanceof Array){
+            if (coord instanceof Array) {
                 coord.forEach(function (_coord) {
                     let _geo = new maptalks.Marker(_coord, {
                         properties: {}
@@ -375,7 +377,7 @@ export class SnapTool extends maptalks.Class {
                     _geo = _geo.toGeoJSON();
                     markers.push(_geo);
                 });
-            }else{
+            } else {
                 let _geo = new maptalks.Marker(coord, {
                     properties:{}
                 });

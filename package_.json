@@ -1,0 +1,45 @@
+{
+  "name": "maptalks.snapto",
+  "version": "0.1.11",
+  "description": "A snap tool used for mouse point to adsorb geometries on map",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/liubgithub/maptalks.snapto"
+  },
+  "main": "dist/maptalks.snapto.min.js",
+  "scripts": {
+    "version": "gulp minify && git add -A dist",
+    "prepublish": "gulp minify"
+  },
+  "devDependencies": {
+    "babel-eslint": "^7.1.1",
+    "babel-preset-es2015": "^6.18.0",
+    "eslint": ">=4.18.2",
+    "eslint-config-maptalks": "^0.2.1",
+    "eslint-plugin-mocha": "^4.8.0",
+    "expect-maptalks": "^0.2.5",
+    "expect.js": "^0.3.1",
+    "gulp": "^3.9.0",
+    "happen": "^0.3.2",
+    "karma": "^1.7.1",
+    "karma-chrome-launcher": "^2.0.0",
+    "karma-expect": "^1.1.3",
+    "karma-expect-maptalks": "^0.1.4",
+    "karma-firefox-launcher": "^1.0.0",
+    "karma-happen": "^0.1.0",
+    "karma-ie-launcher": "^1.0.0",
+    "karma-mocha": "^1.3.0",
+    "karma-mocha-reporter": "^2.2.5",
+    "maptalks": "^0.39.5",
+    "maptalks-build-helpers": "^0.3.0",
+    "minimist": "^1.2.0",
+    "mocha": "^2.4.5"
+  },
+  "peerDependencies": {
+    "maptalks": "^1.0.0-beta.7"
+  },
+  "dependencies": {
+    "geojson-rbush": "^1.2.0"
+  }
+}
