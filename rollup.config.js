@@ -5,7 +5,7 @@ const uglify = require('rollup-plugin-uglify').uglify;
 const pkg = require('./package.json');
 
 const production = process.env.BUILD === 'production';
-const outputFile = production ? 'dist/maptalks.snapto.js' : 'dist/maptalks.snapto-dev.js';
+const outputFile = production ? 'dist/maptalks.snapto.min.js' : 'dist/maptalks.snapto.js';
 const plugins = production ? [
     uglify({
         mangle: {
